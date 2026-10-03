@@ -1,0 +1,58 @@
+/* src/components/TopUpModal/TopUpModal.css */
+.topup-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.topup-modal {
+  position: relative; width: 100%; max-width: 420px;
+  background: #fff; border-radius: 16px; padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  font-family: inherit; color: #0f172a;
+}
+.topup-close {
+  position: absolute; top: 14px; right: 14px; border: 0; background: transparent;
+  color: #64748b; cursor: pointer; padding: 6px; border-radius: 8px;
+}
+.topup-close:hover { background: #f1f5f9; }
+.topup-head { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+.topup-head h2, .topup-center h2 { margin: 0; font-size: 18px; }
+.topup-head p { margin: 2px 0 0; font-size: 13px; color: #64748b; }
+.topup-head-icon {
+  width: 40px; height: 40px; border-radius: 10px; background: #e0f2fe; color: #0077b6;
+  display: flex; align-items: center; justify-content: center;
+}
+.topup-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.topup-input {
+  width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 18px; font-weight: 600;
+  border: 1.5px solid #cbd5e1; border-radius: 10px; outline: none;
+}
+.topup-input:focus { border-color: #0077b6; box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15); }
+.topup-presets { display: flex; gap: 8px; margin: 12px 0 16px; flex-wrap: wrap; }
+.topup-chip {
+  padding: 7px 14px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer; color: #334155;
+}
+.topup-chip:hover { border-color: #0077b6; }
+.topup-chip-active { background: #0077b6; border-color: #0077b6; color: #fff; }
+.topup-primary, .topup-secondary {
+  width: 100%; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.topup-primary { border: 0; background: #0077b6; color: #fff; }
+.topup-primary:hover:not(:disabled) { background: #006399; }
+.topup-secondary { border: 1.5px solid #cbd5e1; background: #fff; color: #0f172a; margin-top: 10px; }
+.topup-primary:disabled, .topup-secondary:disabled { opacity: 0.55; cursor: not-allowed; }
+.topup-hint { text-align: center; font-size: 12px; color: #94a3b8; margin: 10px 0 0; }
+.topup-error {
+  display: flex; align-items: center; gap: 6px; color: #b91c1c; background: #fef2f2;
+  padding: 10px 12px; border-radius: 8px; font-size: 13px; margin: 0 0 14px;
+}
+.topup-center { text-align: center; padding: 12px 0 4px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.topup-center p { margin: 0; color: #475569; font-size: 14px; line-height: 1.5; }
+.topup-link { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: #0077b6; text-decoration: none; }
+.topup-link:hover { text-decoration: underline; }
+.topup-blue { color: #0077b6; } .topup-green { color: #16a34a; }
+.topup-spin { animation: topup-rot 1s linear infinite; }
+@keyframes topup-rot { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .topup-spin { animation-duration: 3s; } }

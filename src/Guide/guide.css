@@ -1,0 +1,587 @@
+/* =========================================================
+   Guide — reprend le design system du Dashboard
+   (#0077b6 / blanc / noir). Les variables ci-dessous
+   dupliquent celles de Dashboard.css afin que ce fichier
+   reste autonome ; si Dashboard.css est déjà chargé
+   globalement, ce bloc :root est simplement redondant
+   (mêmes valeurs) et sans effet de bord.
+   ========================================================= */
+:root {
+  /* Palette sidebar */
+  --sidebar-primary: #0077b6;
+  --sidebar-primary-hover: #005f92;
+  --sidebar-primary-light: #eff6ff;
+
+  --sidebar-ink: #1e293b;
+  --sidebar-muted: #64748b;
+
+  --color-primary: var(--sidebar-primary);
+  --color-primary-dark: var(--sidebar-primary-hover);
+  --color-primary-tint: var(--sidebar-primary-light);
+  --color-primary-tint-strong: rgba(0, 119, 182, 0.16);
+
+  --color-white: #ffffff;
+  --color-black: var(--sidebar-ink);
+
+  /* Surfaces "inversées" (badge, toggle) : encre en clair, blanc en sombre */
+  --color-inverse-bg: var(--sidebar-ink);
+  --color-inverse-text: #ffffff;
+
+  --color-text-primary: var(--sidebar-ink);
+  --color-text-secondary: var(--sidebar-muted);
+  --color-text-muted: color-mix(in srgb, var(--sidebar-muted) 75%, transparent);
+  --color-text-placeholder: color-mix(in srgb, var(--sidebar-muted) 50%, transparent);
+
+  --color-bg-page: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-bg-subtle: rgba(30, 41, 59, 0.03);
+  --color-bg-subtle-strong: rgba(30, 41, 59, 0.06);
+  --color-border: rgba(30, 41, 59, 0.12);
+  --color-border-light: rgba(30, 41, 59, 0.07);
+
+  --color-teal: #0077b6;
+  --color-purple: #0077b6;
+
+  /* Couleurs de texte des callouts (ajustées en mode sombre) */
+  --callout-tip-text: var(--sidebar-primary-hover);
+  --callout-info-text: #0077b6;
+  --callout-warning-text: #0077b6;
+  --guide-link-color: var(--sidebar-primary);
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, monospace;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 8px -2px rgb(0 0 0 / 0.10);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-full: 9999px;
+
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+
+  --space-page-x: clamp(1rem, 4vw, 2.5rem);
+  --space-page-y: clamp(1rem, 3vw, 2rem);
+  --space-section: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.guide-app {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-page);
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--color-text-secondary);
+}
+
+/* =========================================================
+   Dark mode (toggle sur la page, indépendant de l'app)
+   ========================================================= */
+.guide-app.guide-dark {
+  /* Palette sidebar en sombre */
+  --sidebar-primary-light: rgba(0, 119, 182, 0.18);
+  --sidebar-ink: #e2e8f0;
+  --sidebar-muted: #94a3b8;
+
+  /* Redéclarées : les var() de :root sont figées à leur valeur claire */
+  --color-primary-tint: var(--sidebar-primary-light);
+  --color-black: var(--sidebar-ink);
+  --color-text-primary: var(--sidebar-ink);
+  --color-text-secondary: var(--sidebar-muted);
+  --color-text-muted: color-mix(in srgb, var(--sidebar-muted) 80%, transparent);
+  --color-text-placeholder: color-mix(in srgb, var(--sidebar-muted) 50%, transparent);
+
+  --color-bg-page: #0b1220;
+  --color-bg-card: #111a2b;
+  --color-bg-subtle: rgba(255, 255, 255, 0.04);
+  --color-bg-subtle-strong: rgba(255, 255, 255, 0.08);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-light: rgba(255, 255, 255, 0.06);
+
+  --color-inverse-bg: #e2e8f0;
+  --color-inverse-text: #0b1220;
+
+  --callout-tip-text: #5cc0f0;
+  --callout-info-text: #2dd4bf;
+  --callout-warning-text: #fbbf24;
+  --guide-link-color: #5cc0f0;
+}
+
+/* =========================================================
+   Accessibilité : focus visible
+   ========================================================= */
+.guide-app :is(button, a):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   Top bar
+   ========================================================= */
+.guide-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.25rem;
+  padding: 0 1.25rem;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+}
+
+.guide-topbar::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-primary);
+}
+
+.guide-topbar-left,
+.guide-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.guide-topbar-divider {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--color-border);
+  margin: 0 0.25rem;
+}
+
+.guide-topbar-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-black);
+}
+
+.guide-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  position: relative;
+}
+
+.guide-icon-btn:hover {
+  background: var(--color-bg-subtle);
+}
+
+.guide-cart-badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  background: var(--color-inverse-bg);
+  color: var(--color-inverse-text);
+  font-size: 0.6rem;
+  font-weight: 700;
+  min-width: 1rem;
+  height: 1rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.2rem;
+}
+
+.guide-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-inverse-bg);
+  color: var(--color-inverse-text);
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+}
+
+.guide-theme-toggle svg:first-child {
+  opacity: 1;
+}
+
+.guide-theme-toggle svg:last-child {
+  opacity: 0.5;
+}
+
+.guide-theme-toggle.is-dark svg:first-child {
+  opacity: 0.5;
+}
+
+.guide-theme-toggle.is-dark svg:last-child {
+  opacity: 1;
+}
+
+/* =========================================================
+   Body / page wrapper
+   ========================================================= */
+.guide-body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-page-y) var(--space-page-x) clamp(2rem, 6vw, 4rem);
+}
+
+/* =========================================================
+   Hero card
+   ========================================================= */
+.guide-hero-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+  box-shadow: var(--shadow-sm);
+}
+
+.guide-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.guide-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.guide-badge-teal {
+ background: rgba(91, 154, 255, 0.12);
+  color: var(--callout-info-text);
+}
+
+.guide-badge-purple {
+  background: rgba(91, 154, 255, 0.12);
+  color: var(--color-purple);
+}
+
+.guide-hero-title {
+  font-size: clamp(1.05rem, 0.9rem + 0.5vw, 1.25rem);
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.guide-hero-subtitle {
+  font-size: clamp(0.85rem, 0.78rem + 0.3vw, 0.95rem);
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   Main layout — sidebar + content
+   ========================================================= */
+.guide-main {
+  display: grid;
+  grid-template-columns: 15.5rem minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+  align-items: start;
+}
+
+/* =========================================================
+   Sidebar
+   ========================================================= */
+.guide-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.guide-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.guide-nav-item:hover {
+  background: var(--sidebar-primary-light);
+  color: var(--sidebar-primary-hover);
+}
+
+.guide-nav-item.is-active {
+  background: var(--sidebar-primary);
+  color: var(--color-white);
+  font-weight: 700;
+}
+
+.guide-nav-item.is-active:hover {
+  background: var(--sidebar-primary-hover);
+  color: var(--color-white);
+}
+
+/* =========================================================
+   Content card
+   ========================================================= */
+.guide-content {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  box-shadow: var(--shadow-sm);
+}
+
+.guide-content-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: clamp(1rem, 0.9rem + 0.3vw, 1.1rem);
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0 0 0.75rem;
+}
+
+.guide-content-intro {
+  font-size: clamp(0.85rem, 0.78rem + 0.3vw, 0.95rem);
+  color: var(--color-text-secondary);
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+  max-width: 60rem;
+}
+
+/* =========================================================
+   Feature table
+   ========================================================= */
+.guide-table {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.guide-table-row {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: 0.9rem;
+}
+
+.guide-table-row:last-child {
+  border-bottom: none;
+}
+
+/* Fix : l'en-tête avait le même fond que le tableau (indiscernable) */
+.guide-table-head {
+  background: var(--color-bg-subtle-strong);
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+.guide-table-feature {
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+.guide-table-desc {
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   Extra content blocks
+   ========================================================= */
+.guide-extra-block {
+  margin-top: 1.5rem;
+}
+
+.guide-subheading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0 0 0.9rem;
+}
+
+/* Numbered steps */
+.guide-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.guide-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.guide-step-badge {
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Code / flow block */
+.guide-code {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Callouts: tip / info / warning */
+.guide-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  border: 1px solid transparent;
+}
+
+.guide-callout-tip {
+  background: var(--color-primary-tint);
+  color: var(--callout-tip-text);
+  border-color: var(--color-primary-tint-strong);
+}
+
+.guide-callout-tip svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.guide-callout-info {
+  background: rgba(13, 148, 136, 0.08);
+  color: var(--callout-info-text);
+  border-color: rgba(13, 148, 136, 0.2);
+}
+
+.guide-callout-info svg {
+  color: var(--callout-info-text);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.guide-callout-warning {
+  background: rgba(217, 119, 6, 0.08);
+  color: var(--callout-warning-text);
+  border-color: rgba(217, 119, 6, 0.25);
+}
+
+.guide-callout-warning svg {
+  color: #d97706;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.guide-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: var(--space-section);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border-light);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.guide-footer strong {
+  color: var(--color-text-secondary);
+}
+
+.guide-link {
+  color: var(--guide-link-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.guide-link:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 900px) {
+  .guide-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .guide-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .guide-nav-item {
+    width: auto;
+  }
+
+  .guide-table-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .guide-body {
+    padding: 1rem;
+  }
+
+  .guide-content,
+  .guide-hero-card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-app * {
+    transition: none !important;
+  }
+}

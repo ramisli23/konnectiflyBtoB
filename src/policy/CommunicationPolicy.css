@@ -1,0 +1,444 @@
+/* =========================================================
+   Communication Policy — même base que Guide/Dashboard,
+   avec un accent teal propre à cette page (badges,
+   carte Quick Contacts).
+   ========================================================= */
+:root {
+  --color-primary: #0077b6;
+  --color-teal: #0077b6;
+  --color-teal-dark: #0077b6;
+  --color-teal-tint: rgba(20, 184, 166, 0.08);
+  --color-teal-tint-strong: rgba(20, 184, 166, 0.16);
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-text-primary: rgba(0, 0, 0, 0.88);
+  --color-text-secondary: rgba(0, 0, 0, 0.64);
+  --color-text-muted: rgba(0, 0, 0, 0.45);
+  --color-text-placeholder: rgba(0, 0, 0, 0.32);
+
+  --color-bg-page: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-bg-subtle: rgba(0, 0, 0, 0.03);
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-light: rgba(0, 0, 0, 0.06);
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-full: 9999px;
+
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+}
+
+.policy-app {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-page);
+  min-height: 100vh;
+  color: var(--color-text-secondary);
+}
+
+/* Dark mode */
+.policy-app.policy-dark {
+  --color-bg-page: #0b1220;
+  --color-bg-card: #111a2b;
+  --color-bg-subtle: rgba(255, 255, 255, 0.04);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-light: rgba(255, 255, 255, 0.06);
+  --color-black: #ffffff;
+  --color-text-primary: rgba(255, 255, 255, 0.92);
+  --color-text-secondary: rgba(255, 255, 255, 0.72);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
+  --color-text-placeholder: rgba(255, 255, 255, 0.32);
+}
+
+/* =========================================================
+   Top bar (identique au Guide, pour cohérence de navigation)
+   ========================================================= */
+.policy-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.25rem;
+  padding: 0 1.25rem;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+}
+
+.policy-topbar::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-teal);
+}
+
+.policy-topbar-left,
+.policy-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.policy-topbar-divider {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--color-border);
+  margin: 0 0.25rem;
+}
+
+.policy-topbar-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-black);
+}
+
+.policy-card policy-quick-card{
+
+background: rgba(91, 154, 255, 0.12);}
+
+
+.policy-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  position: relative;
+}
+
+.policy-icon-btn:hover {
+  background: var(--color-bg-subtle);
+}
+
+.policy-cart-badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  background: var(--color-black);
+  color: var(--color-white);
+  font-size: 0.6rem;
+  font-weight: 700;
+  min-width: 1rem;
+  height: 1rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.2rem;
+}
+
+.policy-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-black);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+}
+
+.policy-theme-toggle svg:last-child {
+  opacity: 0.5;
+}
+
+.policy-theme-toggle.is-dark svg:first-child {
+  opacity: 0.5;
+}
+
+.policy-theme-toggle.is-dark svg:last-child {
+  opacity: 1;
+}
+
+/* =========================================================
+   Body wrapper
+   ========================================================= */
+.policy-body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 4vw, 2.5rem)
+    clamp(2rem, 6vw, 4rem);
+}
+
+/* =========================================================
+   Page header
+   ========================================================= */
+.policy-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.policy-badges {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.policy-badge {
+  background: var(--color-teal);
+  color: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.9rem;
+  border-radius: var(--radius-full);
+}
+
+.policy-title {
+  font-size: clamp(1.5rem, 1.2rem + 1.3vw, 2rem);
+  font-weight: 800;
+  color: var(--color-black);
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.02em;
+}
+
+.policy-subtitle {
+  font-size: clamp(0.9rem, 0.8rem + 0.4vw, 1rem);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 55rem;
+  line-height: 1.6;
+}
+
+.policy-header-rule {
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  margin: 0 0 clamp(1.5rem, 3vw, 2rem);
+}
+
+/* =========================================================
+   Two column layout
+   ========================================================= */
+.policy-columns {
+  display: grid;
+  grid-template-columns: 1fr 22rem;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+  align-items: start;
+}
+
+.policy-card {
+  border-radius: var(--radius-lg);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.policy-main-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+}
+
+.policy-card-title {
+  font-size: clamp(1.05rem, 0.9rem + 0.4vw, 1.2rem);
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0 0 0.3rem;
+}
+
+.policy-card-subtitle {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1.25rem;
+}
+
+.policy-section-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0 0 0.9rem;
+}
+
+.policy-divider {
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  margin: 1.5rem 0;
+}
+
+/* =========================================================
+   Channel / realtime boxes
+   ========================================================= */
+.policy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.policy-box {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem;
+  background: var(--color-bg-card);
+}
+
+.policy-box-full {
+  grid-column: 1 / -1;
+}
+
+.policy-box-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.policy-box h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.policy-pill {
+  flex-shrink: 0;
+  background: var(--color-teal);
+  color: var(--color-white);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.policy-contact {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 0.7rem;
+}
+
+.policy-bullets {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.policy-bullets li {
+  font-size: 0.87rem;
+  color: var(--color-text-muted);
+}
+
+.policy-note {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0.7rem 0 0;
+  line-height: 1.6;
+}
+
+.policy-note-strong {
+  color: var(--color-text-secondary);
+  margin-top: 0;
+}
+
+/* =========================================================
+   Our commitment
+   ========================================================= */
+.policy-commitments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.policy-commitments p {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.policy-commitments strong {
+  color: var(--color-black);
+}
+
+/* =========================================================
+   Quick contacts (sidebar card)
+   ========================================================= */
+.policy-quick-card {
+  background: var(--color-teal-tint);
+  border: 1px solid var(--color-teal-tint-strong);
+}
+
+.policy-quick-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0 0 0.25rem;
+}
+
+.policy-quick-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1.25rem;
+}
+
+.policy-quick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.policy-quick-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.87rem;
+}
+
+.policy-quick-label {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.policy-quick-value {
+  color: var(--color-black);
+  font-weight: 700;
+  text-align: right;
+  word-break: break-word;
+}
+
+.policy-quick-callout {
+  background: var(--color-teal);
+  color: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 1024px) {
+  .policy-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .policy-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .policy-box-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
