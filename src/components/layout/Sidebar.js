@@ -1,6 +1,7 @@
 // src/components/Sidebar/Sidebar.js  (adjust import paths if your folders differ)
 import { ChevronFirst, ChevronLast, MoreVertical, LogOut, Wallet, Plus } from "lucide-react"
 import { createContext, useContext, useState, useRef, useEffect } from "react"
+import { NavLink } from "react-router-dom"
 import logo from "../../assets/images/logo3.png"
 import {
   subscribeToAgencyBalance,
@@ -177,7 +178,7 @@ export default function Sidebar({ children, user, onLogout }) {
   )
 }
 
-export function SidebarItem({ icon, text, active, alert, onClick }) {
+export function SidebarItem({ icon, text, alert, to, end = false, onClick }) {
   const { expanded } = useContext(SidebarContext)
 
   const handleKeyDown = (e) => {
@@ -189,38 +190,41 @@ export function SidebarItem({ icon, text, active, alert, onClick }) {
   }
 
   return (
-    <li
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-current={active ? "page" : undefined}
-      className={`sidebar-item ${active ? "sidebar-item-active" : ""}`}
-    >
-      {/* Icon */}
-      <span className="sidebar-item-icon">{icon}</span>
-
-      {/* Text */}
-      <span
-        className={`sidebar-item-text ${
-          expanded ? "sidebar-item-text-visible" : ""
-        }`}
+    <li>
+      <NavLink
+        to={to}
+        end={end}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        className={({ isActive }) =>
+          `sidebar-item ${isActive ? "sidebar-item-active" : ""}`
+        }
       >
-        {text}
-      </span>
+        {/* Icon */}
+        <span className="sidebar-item-icon">{icon}</span>
 
-      {/* Alert */}
-      {alert && (
+        {/* Text */}
         <span
-          className={`sidebar-item-alert ${
-            expanded ? "sidebar-item-alert-expanded" : ""
+          className={`sidebar-item-text ${
+            expanded ? "sidebar-item-text-visible" : ""
           }`}
-          aria-hidden="true"
-        />
-      )}
+        >
+          {text}
+        </span>
 
-      {/* Tooltip when collapsed */}
-      {!expanded && <div className="sidebar-tooltip">{text}</div>}
+        {/* Alert */}
+        {alert && (
+          <span
+            className={`sidebar-item-alert ${
+              expanded ? "sidebar-item-alert-expanded" : ""
+            }`}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Tooltip when collapsed */}
+        {!expanded && <div className="sidebar-tooltip">{text}</div>}
+      </NavLink>
     </li>
   )
 }

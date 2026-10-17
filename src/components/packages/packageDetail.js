@@ -12,7 +12,6 @@ import {
   ChevronRight,
   X,
   Wifi,
-  Smartphone,
   Signal,
   MessageSquare,
   Phone,
@@ -56,9 +55,8 @@ export default function PackageDetail({
   // FILTERS
   // =====================================================
 
-  const [packageScope, setPackageScope] = useState(
-    country?.scope || "countries"
-  );
+  // Le scope provient toujours de la destination choisie
+  const packageScope = country?.scope || "countries";
 
   const [packageType, setPackageType] = useState(
     country?.type || "DATA-ONLY"
@@ -66,10 +64,6 @@ export default function PackageDetail({
 
   const [packageMode, setPackageMode] = useState(
     country?.mode || "limited"
-  );
-
-  const [billing, setBilling] = useState(
-    country?.billing || "fixed"
   );
 
   // =====================================================
@@ -104,21 +98,6 @@ export default function PackageDetail({
   // FILTER OPTIONS
   // =====================================================
 
-  const scopeTypes = [
-    {
-      id: "countries",
-      label: "Local",
-    },
-    {
-      id: "continents",
-      label: "Regional",
-    },
-    {
-      id: "global",
-      label: "Global",
-    },
-  ];
-
   const packageTypes = [
     {
       id: "DATA-ONLY",
@@ -141,17 +120,6 @@ export default function PackageDetail({
     },
   ];
 
-  const billingTypes = [
-    {
-      id: "fixed",
-      label: "Fixed",
-    },
-    {
-      id: "usage",
-      label: "Usage",
-    },
-  ];
-
   // =====================================================
   // LOAD PACKAGES
   // =====================================================
@@ -169,14 +137,6 @@ export default function PackageDetail({
     const endpointType =
       getPackageEndpointType(packageScope);
 
-    console.log("=================================");
-    console.log("PACKAGE REQUEST");
-    console.log("Scope:", endpointType);
-    console.log("ID:", country.id);
-    console.log("Type:", packageType);
-    console.log("Mode:", packageMode);
-    console.log("=================================");
-
     getPackagesByCountry(
       endpointType,
       country.id,
@@ -184,8 +144,6 @@ export default function PackageDetail({
       packageMode
     )
       .then((response) => {
-        console.log("Packages API:", response);
-
         if (!response?.status) {
           throw new Error(
             response?.message ||
@@ -280,6 +238,29 @@ export default function PackageDetail({
     setShowDetails(false);
     setDetailPlan(null);
   };
+
+  // =====================================================
+  // FERMER LA FICHE AVEC LA TOUCHE ÉCHAP
+  // =====================================================
+
+  useEffect(() => {
+    if (!showDetails) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") closeDetails();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showDetails]);
 
   // =====================================================
   // BUY PACKAGE → OPEN CHECKOUT PAGE
@@ -460,6 +441,7 @@ export default function PackageDetail({
           type="text"
           className="package-detail-search"
           placeholder="Search packages"
+          aria-label="Search packages"
           value={search}
           onChange={(e) =>
             setSearch(e.target.value)
@@ -679,6 +661,9 @@ export default function PackageDetail({
 
           <div
             className="package-detail-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={detailPlan.name}
             onClick={(event) =>
               event.stopPropagation()
             }

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 
 import {
   Wallet,
@@ -22,6 +22,8 @@ import {
   ChevronDown,
   Search,
   LifeBuoy,
+  Activity,
+  ArrowUpRight,
 } from "lucide-react"
 
 import {
@@ -33,88 +35,61 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
+
+import { useReveal, useCountUp } from "../../../hooks/animations"
+
 import "./Dashboard.css"
+
 import {
   subscribeToAgencyBalance,
 } from "../../../services/balanceService"
 
-import PackageDetail from "../../../components/packages/packageDetail.js"
-import Packages from "../Packages/CountryPage.js"
-import BuyPackages from "../Packages/BuyPackage.js"
-import Dealers from "../Dealers/Dealers.js"
-import Credits from "../Credits/credits.js"
-import Guide from "../../../Guide/guide.js"
-import Policy from "../../../policy/CommunicationPolicy.js"
-
 
 /* =========================================================
-   MAIN DASHBOARD ROUTER
+   PALETTE — 4 bleus uniquement
    ========================================================= */
 
-export default function Dashboard({ page, user }) {
-  switch (page) {
-    case "Dashboard":
-      return <DashboardHome user={user} />
-
-    case "Packages":
-      return <BuyPackages />
-
-    case "Dealers":
-      return <Dealers />
-
-    case "Credits":
-      return <Credits />
-
-    case "Settings":
-      return <SettingsPage />
-
-      case "Guide":
-      return <Guide />
-      case "Policy":
-      return <Policy/>
-
-    case "Help":
-      return <HelpPage />
-
-    default:
-      return <DashboardHome user={user} />
-  }
+const BLUE = {
+  blue: "#0077b6",
+  dark: "#023e73",
+  deep: "#012a4d",
+  light: "#eaf4fb",
 }
 
-
 /* =========================================================
-   DASHBOARD STATS
+   DASHBOARD — PAGE D'ACCUEIL
    ========================================================= */
 
 function useDashboardStats(user) {
   return useMemo(
     () => ({
-    business: [
-  {
-    label: "All Bundles Amount",
-    value: `${Number(user?.balance ?? 0).toFixed(2)} DZD`,
-    icon: <Coins size={22} />,
-    dark: true,
-  },
+      business: [
+        {
+          label: "All Bundles Amount",
+          value: `${Number(user?.balance ?? 0).toFixed(2)} DZD`,
+          icon: <Coins size={22} />,
+          dark: true,
+          live: true,
+        },
 
-  {
-    label: "Wallet Refill",
-    value: "0 ",
-    icon: <Wallet size={22} />,
-  },
+        {
+          label: "Wallet Refill",
+          value: "0 ",
+          icon: <Wallet size={22} />,
+        },
 
-  {
-    label: "Dealer Sale Amount",
-    value: "$0",
-    icon: <Handshake size={22} />,
-  },
+        {
+          label: "Dealer Sale Amount",
+          value: "$0",
+          icon: <Handshake size={22} />,
+        },
 
-  {
-    label: "Dealer Profit",
-    value: "0 DZD",
-    icon: <TrendingUp size={22} />,
-  },
-],
+        {
+          label: "Dealer Profit",
+          value: "0 DZD",
+          icon: <TrendingUp size={22} />,
+        },
+      ],
 
       operations: [
         {
@@ -122,21 +97,25 @@ function useDashboardStats(user) {
           value: 0,
           icon: <Globe2 size={22} />,
           dark: true,
+          numeric: true,
         },
         {
           label: "Bundle Count",
           value: 0,
           icon: <Box size={22} />,
+          numeric: true,
         },
         {
           label: "Dealer eSIM Sold",
           value: 0,
           icon: <Smartphone size={22} />,
+          numeric: true,
         },
         {
           label: "Dealer Bundle Count",
           value: 0,
           icon: <Boxes size={22} />,
+          numeric: true,
         },
       ],
 
@@ -180,48 +159,12 @@ function useDashboardStats(user) {
       ],
 
       monthly: [
-        {
-          month: "Apr",
-          esim_sold: 3,
-          bundle_count: 2,
-          sale: 6,
-          profit: 1,
-        },
-        {
-          month: "May",
-          esim_sold: 4,
-          bundle_count: 3,
-          sale: 9,
-          profit: 2,
-        },
-        {
-          month: "Jun",
-          esim_sold: 6,
-          bundle_count: 5,
-          sale: 13,
-          profit: 3,
-        },
-        {
-          month: "Jul",
-          esim_sold: 4,
-          bundle_count: 3,
-          sale: 9,
-          profit: 2,
-        },
-        {
-          month: "Aug",
-          esim_sold: 2,
-          bundle_count: 1,
-          sale: 3,
-          profit: 1,
-        },
-        {
-          month: "Sep",
-          esim_sold: 21,
-          bundle_count: 8,
-          sale: 62,
-          profit: 12,
-        },
+        { month: "Avr", esim_sold: 3, bundle_count: 2, sale: 6, profit: 1 },
+        { month: "Mai", esim_sold: 4, bundle_count: 3, sale: 9, profit: 2 },
+        { month: "Juin", esim_sold: 6, bundle_count: 5, sale: 13, profit: 3 },
+        { month: "Juil", esim_sold: 4, bundle_count: 3, sale: 9, profit: 2 },
+        { month: "Août", esim_sold: 2, bundle_count: 1, sale: 3, profit: 1 },
+        { month: "Sep", esim_sold: 21, bundle_count: 8, sale: 62, profit: 12 },
       ],
     }),
     [user]
@@ -230,17 +173,102 @@ function useDashboardStats(user) {
 
 
 /* =========================================================
+   TOOLTIP RECHARTS — stylé CSS
+   ========================================================= */
+
+const CHART_SERIES = [
+  { key: "esim_sold", label: "eSIM sold", color: BLUE.blue, dashed: false, fill: "url(#gradSale)" },
+  { key: "bundle_count", label: "bundle_count", color: BLUE.dark, dashed: false },
+  { key: "sale", label: "sale", color: BLUE.deep, dashed: false },
+  { key: "profit", label: "profit", color: BLUE.blue, dashed: true },
+]
+
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+
+  return (
+    <div className="dash-tooltip">
+      <span className="dash-tooltip-label">{label}</span>
+
+      {payload.map((entry) => (
+        <div className="dash-tooltip-row" key={entry.dataKey}>
+          <i style={{ background: entry.color }} />
+          <span>{entry.name}</span>
+          <strong>{entry.value}</strong>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+/* =========================================================
+   NOMBRE ANIMÉ
+   ========================================================= */
+
+function AnimatedNumber({ value, decimals = 0, suffix = "" }) {
+  const ref = useRef(null)
+  const [started, setStarted] = useState(false)
+  const count = useCountUp(value, 1400, started)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el || started) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+
+        setStarted(true)
+        observer.disconnect()
+      },
+      { threshold: 0.4 }
+    )
+
+    observer.observe(el)
+
+    return () => observer.disconnect()
+  }, [started])
+
+  const display = decimals
+    ? count.toFixed(decimals).replace(".", ",")
+    : Math.round(count).toLocaleString("fr-FR")
+
+  return (
+    <span ref={ref} className="dash-count">
+      {display}
+      {suffix}
+    </span>
+  )
+}
+
+
+/* =========================================================
    METRIC CARD
    ========================================================= */
 
-function MetricCard({ icon, label, value, dark }) {
+function MetricCard({ icon, label, value, dark, live, numeric, delay = 0 }) {
   return (
-    <div className={`metric-card ${dark ? "metric-card-dark" : ""}`}>
+    <div
+      className={`metric-card ${dark ? "metric-card-dark" : ""}`}
+      data-reveal
+      style={{ "--dash-delay": `${delay}ms` }}
+    >
+      <span className="metric-card-sheen" aria-hidden="true" />
+
       <div className="metric-card-text">
-        <span className="metric-card-label">{label}</span>
+        <span className="metric-card-label">
+          {label}
+          {live && (
+            <span className="metric-card-live" title="Solde en temps réel">
+              <i />
+              live
+            </span>
+          )}
+        </span>
 
         <strong className="metric-card-value">
-          {value}
+          {numeric ? <AnimatedNumber value={Number(value)} /> : value}
         </strong>
       </div>
 
@@ -256,24 +284,20 @@ function MetricCard({ icon, label, value, dark }) {
    BUNDLE SOLD MINI CARD
    ========================================================= */
 
-function BundleSoldMini({ icon, label, value, tint }) {
+function BundleSoldMini({ icon, label, value, tint, delay = 0 }) {
   return (
-    <div className="bundle-mini">
+    <div className="bundle-mini" data-reveal style={{ "--dash-delay": `${delay}ms` }}>
+      <div className={`bundle-mini-icon bundle-mini-icon-${tint}`}>{icon}</div>
 
-      <div
-        className={`bundle-mini-icon bundle-mini-icon-${tint}`}
-      >
-        {icon}
-      </div>
-
-      <p className="bundle-mini-label">
-        {label}
-      </p>
+      <p className="bundle-mini-label">{label}</p>
 
       <p className="bundle-mini-value">
-        {value}
+        <AnimatedNumber value={Number(value)} />
       </p>
 
+      <span className="bundle-mini-bar" aria-hidden="true">
+        <i style={{ "--dash-bar": `${value}%` }} />
+      </span>
     </div>
   )
 }
@@ -283,13 +307,12 @@ function BundleSoldMini({ icon, label, value, tint }) {
    DASHBOARD HOME
    ========================================================= */
 
-function DashboardHome({ user }) {
-
-  const [selectedCountry, setSelectedCountry] =
-    useState(null)
+export function DashboardHome({ user }) {
 
   const [realtimeBalance, setRealtimeBalance] =
     useState(Number(user?.balance ?? 0))
+
+  const revealRef = useReveal()
 
 
   useEffect(() => {
@@ -297,33 +320,19 @@ function DashboardHome({ user }) {
     const agencyId = user?.id
 
     if (!agencyId) {
-      console.warn("No agency ID available")
       return
     }
-
-    console.log(
-      "Subscribing to balance:",
-      `agences/${agencyId}/balance`
-    )
 
     const unsubscribe =
       subscribeToAgencyBalance(
         agencyId,
 
         (balance) => {
-          console.log(
-            "🔥 Realtime balance:",
-            balance
-          )
-
           setRealtimeBalance(balance)
         },
 
         (error) => {
-          console.error(
-            "Balance realtime error:",
-            error
-          )
+          console.error("Balance realtime error:", error)
         }
       )
 
@@ -340,33 +349,30 @@ function DashboardHome({ user }) {
   })
 
 
-
-  if (selectedCountry) {
-    return (
-      <PackageDetail
-        country={selectedCountry}
-        onBack={() => setSelectedCountry(null)}
-      />
-    )
-  }
-
   /* -----------------------------------------
      DASHBOARD
      ----------------------------------------- */
 
   return (
-    <div className="dash-page">
+    <div className="dash-page" ref={revealRef}>
 
       {/* PAGE HEADER */}
 
-      <h1 className="dash-title">
-        Tableau de bord
-      </h1>
+      <div className="dash-page-header" data-reveal>
+        <div>
+          <h1 className="dash-title">Tableau de bord</h1>
 
-      <p className="dash-subtitle">
-        Vue d'ensemble de l'activité{" "}
-        {user?.company_name || "de votre agence"}.
-      </p>
+          <p className="dash-subtitle">
+            Vue d'ensemble de l'activité{" "}
+            {user?.company_name || "de votre agence"}.
+          </p>
+        </div>
+
+        <span className="dash-live-chip">
+          <span className="dash-live-dot" aria-hidden="true" />
+          Solde synchronisé en direct
+        </span>
+      </div>
 
 
       {/* =====================================================
@@ -375,51 +381,33 @@ function DashboardHome({ user }) {
 
       <div className="metrics-row">
 
-        {/* BUSINESS */}
-
-        <section className="metrics-col">
+        <section className="metrics-col" data-reveal style={{ "--dash-delay": "60ms" }}>
 
           <h2 className="metrics-heading">
             <TrendingUp size={16} />
-
             Business Metrics
           </h2>
 
           <div className="metrics-grid">
-
-            {stats.business.map((m) => (
-              <MetricCard
-                key={m.label}
-                {...m}
-              />
+            {stats.business.map((m, i) => (
+              <MetricCard key={m.label} {...m} delay={i * 80} />
             ))}
-
           </div>
 
         </section>
 
 
-        {/* OPERATIONS */}
-
-        <section className="metrics-col">
+        <section className="metrics-col" data-reveal style={{ "--dash-delay": "140ms" }}>
 
           <h2 className="metrics-heading">
-
             <ClipboardCheck size={16} />
-
             Operations Metrics
-
           </h2>
 
           <div className="metrics-grid">
-
-            {stats.operations.map((m) => (
-              <MetricCard
-                key={m.label}
-                {...m}
-              />
+            {stats.operations.map((m, i) => (
+              <MetricCard key={m.label} {...m} delay={i * 80} />
             ))}
-
           </div>
 
         </section>
@@ -433,84 +421,58 @@ function DashboardHome({ user }) {
 
       <div className="panels-row">
 
-        {/* BUNDLE SOLD */}
-
-        <div className="dash-card bundle-sold-card">
-
+        <div className="dash-card bundle-sold-card" data-reveal style={{ "--dash-delay": "60ms" }}>
           <h3>
-
             <Box size={17} />
-
             Bundle Sold
-
           </h3>
 
-
           <div className="bundle-mini-grid">
-
             <BundleSoldMini
-              tint="teal"
+              tint="blue"
               icon={<Globe size={18} />}
               label="Regional"
               value={stats.bundleSold.regional}
+              delay={0}
             />
 
             <BundleSoldMini
-              tint="indigo"
+              tint="dark"
               icon={<MapPin size={18} />}
               label="Local"
               value={stats.bundleSold.local}
+              delay={90}
             />
 
             <BundleSoldMini
-              tint="rose"
+              tint="deep"
               icon={<Globe2 size={18} />}
               label="Global"
               value={stats.bundleSold.global}
+              delay={180}
             />
-
           </div>
-
         </div>
 
 
-        {/* ALL TIME STATISTICS */}
-
-        <div className="dash-card all-time-card">
-
+        <div className="dash-card all-time-card" data-reveal style={{ "--dash-delay": "140ms" }}>
           <h3>
-
             <BarChart3 size={17} />
-
             All Time Statistics
-
           </h3>
 
-
           <ul className="all-time-list">
-
-            {stats.allTime.map((row) => (
-
-              <li key={row.label}>
-
+            {stats.allTime.map((row, i) => (
+              <li key={row.label} style={{ "--dash-delay": `${180 + i * 60}ms` }}>
                 <span className="all-time-row-label">
-
                   {row.icon}
-
                   {row.label}
-
                 </span>
 
-                <strong>
-                  {row.value}
-                </strong>
-
+                <strong>{row.value}</strong>
               </li>
-
             ))}
-
           </ul>
-
         </div>
 
       </div>
@@ -522,692 +484,196 @@ function DashboardHome({ user }) {
 
       <div className="panels-row panels-row-charts">
 
-        {/* MONTHLY CHART */}
-
-        <div className="dash-card chart-panel">
+        <div className="dash-card chart-panel" data-reveal>
 
           <div className="chart-panel-header">
-
             <h3 style={{ margin: 0 }}>
-
               <BarChart3 size={17} />
-
               Monthly eSIM sales and profit overview
-
             </h3>
 
-            <span className="chart-panel-period">
-              Last 6 months
-            </span>
-
+            <span className="chart-panel-period">Last 6 months</span>
           </div>
 
 
-          <ResponsiveContainer
-            width="100%"
-            height={280}
-          >
-
+          <ResponsiveContainer width="100%" height={280}>
             <AreaChart
               data={stats.monthly}
-              margin={{
-                top: 20,
-                right: 10,
-                left: -10,
-                bottom: 0,
-              }}
+              margin={{ top: 20, right: 10, left: -10, bottom: 0 }}
             >
-
               <defs>
-
-                <linearGradient
-                  id="saleGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-
-                  <stop
-                    offset="0%"
-                    stopColor="#db2777"
-                    stopOpacity={0.25}
-                  />
-
-                  <stop
-                    offset="100%"
-                    stopColor="#db2777"
-                    stopOpacity={0}
-                  />
-
+                <linearGradient id="gradSale" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={BLUE.blue} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={BLUE.blue} stopOpacity={0} />
                 </linearGradient>
 
+                <linearGradient id="gradDark" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={BLUE.dark} stopOpacity={0.22} />
+                  <stop offset="100%" stopColor={BLUE.dark} stopOpacity={0} />
+                </linearGradient>
               </defs>
 
-
-              <CartesianGrid
-                vertical={false}
-                stroke="var(--color-border-light)"
-              />
-
+              <CartesianGrid vertical={false} stroke="rgba(0, 119, 182, 0.12)" />
 
               <XAxis
                 dataKey="month"
                 tickLine={false}
-                axisLine={false}
-                fontSize={12}
+                axisLine={{ stroke: "rgba(0, 119, 182, 0.18)" }}
+                tick={{ fill: "rgba(0, 0, 0, 0.45)", fontSize: 12 }}
               />
-
 
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                fontSize={12}
+                tick={{ fill: "rgba(0, 0, 0, 0.45)", fontSize: 12 }}
               />
 
-
-              <Tooltip />
-
-
-              <Area
-                type="monotone"
-                dataKey="esim_sold"
-                stroke="#06b6d4"
-                fill="transparent"
-                strokeWidth={2}
+              <Tooltip
+                content={<ChartTooltip />}
+                cursor={{ stroke: "rgba(0, 119, 182, 0.25)", strokeWidth: 1 }}
               />
 
-
-              <Area
-                type="monotone"
-                dataKey="bundle_count"
-                stroke="#6366f1"
-                fill="transparent"
-                strokeWidth={2}
-              />
-
-
-              <Area
-                type="monotone"
-                dataKey="sale"
-                stroke="#db2777"
-                fill="url(#saleGradient)"
-                strokeWidth={2}
-              />
-
-
-              <Area
-                type="monotone"
-                dataKey="profit"
-                stroke="#a855f7"
-                fill="transparent"
-                strokeWidth={2}
-              />
-
+              {CHART_SERIES.map((s) => (
+                <Area
+                  key={s.key}
+                  type="monotone"
+                  name={s.label}
+                  dataKey={s.key}
+                  stroke={s.color}
+                  fill={s.fill || (s.key === "bundle_count" ? "url(#gradDark)" : "transparent")}
+                  strokeWidth={2.25}
+                  strokeDasharray={s.dashed ? "6 5" : undefined}
+                  dot={false}
+                  activeDot={{
+                    r: 5,
+                    strokeWidth: 0,
+                    fill: s.color,
+                  }}
+                  animationDuration={1100}
+                  animationEasing="ease-out"
+                />
+              ))}
             </AreaChart>
-
           </ResponsiveContainer>
 
 
-          {/* LEGEND */}
-
           <div className="chart-legend">
-
-            <span>
-              <i style={{ background: "#06b6d4" }} />
-              esim_sold
-            </span>
-
-            <span>
-              <i style={{ background: "#6366f1" }} />
-              bundle_count
-            </span>
-
-            <span>
-              <i style={{ background: "#db2777" }} />
-              sale
-            </span>
-
-            <span>
-              <i style={{ background: "#a855f7" }} />
-              profit
-            </span>
-
+            {CHART_SERIES.map((s) => (
+              <span key={s.key}>
+                <i
+                  style={{
+                    background: s.color,
+                    opacity: s.dashed ? 0.6 : 1,
+                  }}
+                />
+                {s.label}
+              </span>
+            ))}
           </div>
 
         </div>
 
 
-        {/* CUSTOMER ACTIVITY */}
-
-        <div className="dash-card chart-panel chart-panel-narrow">
+        <div className="dash-card chart-panel chart-panel-narrow" data-reveal>
 
           <div className="chart-panel-header">
-
             <h3 style={{ margin: 0 }}>
-
               <LineChartIcon size={17} />
-
               Customer Activity
-
             </h3>
-
           </div>
 
 
           <div className="chart-empty-state">
-            Pas encore de données
+            <span className="chart-empty-icon">
+              <Activity size={22} />
+            </span>
+            <p>Pas encore de données</p>
+            <span className="chart-empty-bar" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
           </div>
 
 
           <div className="chart-legend">
-
-            <span>
-              <i style={{ background: "#06b6d4" }} />
-              New Users
-            </span>
-
-            <span>
-              <i style={{ background: "#6366f1" }} />
-              SIM Buy
-            </span>
-
-            <span>
-              <i style={{ background: "#db2777" }} />
-              Visitors
-            </span>
-
-            <span>
-              <i style={{ background: "#a855f7" }} />
-              Renew Packages
-            </span>
-
+            {["New Users", "SIM Buy", "Visitors", "Renew Packages"].map((label) => (
+              <span key={label}>
+                <i style={{ background: BLUE.blue, opacity: 0.45 }} />
+                {label}
+              </span>
+            ))}
           </div>
 
         </div>
 
       </div>
 
-
-    </div>
-  )
-}
-
-
-/* =========================================================
-   STATISTICS PAGE
-   ========================================================= */
-
-function StatisticsPage() {
-
-  const bars = [
-    { label: "Lun", value: 40 },
-    { label: "Mar", value: 65 },
-    { label: "Mer", value: 50 },
-    { label: "Jeu", value: 80 },
-    { label: "Ven", value: 95 },
-    { label: "Sam", value: 60 },
-    { label: "Dim", value: 30 },
-  ]
-
-  const max = Math.max(
-    ...bars.map((b) => b.value)
-  )
-
-
-  return (
-    <div className="dash-page">
-
-      <h1 className="dash-title">
-        Statistiques
-      </h1>
-
-      <p className="dash-subtitle">
-        Connexions internet cette semaine.
+      <p className="dash-footnote">
+        <Activity size={13} />
+        Les données se rafraîchissent automatiquement depuis Firebase.
+        <ArrowUpRight size={13} />
       </p>
 
-
-      <div className="dash-card">
-
-        <h3>
-          Connexions par jour
-        </h3>
-
-
-        <div className="dash-chart">
-
-          {bars.map((b) => (
-
-            <div
-              className="dash-chart-col"
-              key={b.label}
-            >
-
-              <div
-                className="dash-chart-bar"
-                style={{
-                  height: `${(b.value / max) * 100}%`,
-                }}
-                title={`${b.value} connexions`}
-              />
-
-              <span className="dash-chart-label">
-                {b.label}
-              </span>
-
-            </div>
-
-          ))}
-
-        </div>
-
-      </div>
-
-
-      <div className="dash-stat-grid dash-stat-grid-3">
-
-        <div className="dash-card dash-mini-stat">
-
-          <p className="dash-stat-label">
-            Temps moyen de connexion
-          </p>
-
-          <p className="dash-stat-value">
-            42 min
-          </p>
-
-        </div>
-
-
-        <div className="dash-card dash-mini-stat">
-
-          <p className="dash-stat-label">
-            Taux de satisfaction
-          </p>
-
-          <p className="dash-stat-value">
-            94%
-          </p>
-
-        </div>
-
-
-        <div className="dash-card dash-mini-stat">
-
-          <p className="dash-stat-label">
-            Pays desservis
-          </p>
-
-          <p className="dash-stat-value">
-            38
-          </p>
-
-        </div>
-
-      </div>
-
     </div>
   )
 }
 
-
-/* =========================================================
-   USERS PAGE
-   ========================================================= */
-
-function UsersPage() {
-
-  const users = [
-    {
-      name: "Amine Belkacem",
-      email: "amine.b@konnectifly.com",
-      role: "Admin",
-      status: "Actif",
-    },
-    {
-      name: "Sarah Meziane",
-      email: "sarah.m@konnectifly.com",
-      role: "Support",
-      status: "Actif",
-    },
-    {
-      name: "Yacine Kaddour",
-      email: "yacine.k@konnectifly.com",
-      role: "Ventes",
-      status: "Inactif",
-    },
-    {
-      name: "Lina Cherif",
-      email: "lina.c@konnectifly.com",
-      role: "Support",
-      status: "Actif",
-    },
-  ]
-
-
-  return (
-    <div className="dash-page">
-
-      <div className="dash-page-header">
-
-        <div>
-
-          <h1 className="dash-title">
-            Utilisateurs
-          </h1>
-
-          <p className="dash-subtitle">
-            Gérez les membres de votre équipe.
-          </p>
-
-        </div>
-
-
-        <button className="dash-btn-primary">
-          + Ajouter un utilisateur
-        </button>
-
-      </div>
-
-
-      <div className="dash-card dash-table-card">
-
-        <table className="dash-table">
-
-          <thead>
-
-            <tr>
-
-              <th>
-                Nom
-              </th>
-
-              <th>
-                Email
-              </th>
-
-              <th>
-                Rôle
-              </th>
-
-              <th>
-                Statut
-              </th>
-
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            {users.map((u) => (
-
-              <tr key={u.email}>
-
-                <td>
-                  {u.name}
-                </td>
-
-                <td className="dash-muted">
-                  {u.email}
-                </td>
-
-                <td>
-                  {u.role}
-                </td>
-
-                <td>
-
-                  <span
-                    className={`dash-badge ${
-                      u.status === "Actif"
-                        ? "dash-badge-green"
-                        : "dash-badge-gray"
-                    }`}
-                  >
-                    {u.status}
-                  </span>
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-  )
-}
-
-
-/* =========================================================
-   INVENTORY PAGE
-   ========================================================= */
-
-function InventoryPage() {
-
-  const items = [
-    {
-      name: "Carte SIM internationale",
-      stock: 12,
-      threshold: 20,
-    },
-    {
-      name: "Routeur WiFi portable",
-      stock: 48,
-      threshold: 15,
-    },
-    {
-      name: "Forfait 10 Go",
-      stock: 3,
-      threshold: 10,
-    },
-    {
-      name: "Batterie externe",
-      stock: 27,
-      threshold: 15,
-    },
-  ]
-
-
-  return (
-    <div className="dash-page">
-
-      <h1 className="dash-title">
-        Inventaire
-      </h1>
-
-      <p className="dash-subtitle">
-        Suivi des stocks disponibles.
-      </p>
-
-
-      <div className="dash-card dash-table-card">
-
-        <table className="dash-table">
-
-          <thead>
-
-            <tr>
-
-              <th>
-                Article
-              </th>
-
-              <th>
-                Stock
-              </th>
-
-              <th>
-                Statut
-              </th>
-
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            {items.map((it) => {
-
-              const low =
-                it.stock < it.threshold
-
-              return (
-
-                <tr key={it.name}>
-
-                  <td>
-                    {it.name}
-                  </td>
-
-                  <td>
-                    {it.stock}
-                  </td>
-
-                  <td>
-
-                    <span
-                      className={`dash-badge ${
-                        low
-                          ? "dash-badge-amber"
-                          : "dash-badge-green"
-                      }`}
-                    >
-                      {low
-                        ? "Stock faible"
-                        : "En stock"}
-                    </span>
-
-                  </td>
-
-                </tr>
-
-              )
-            })}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-  )
-}
 
 
 /* =========================================================
    SETTINGS PAGE
    ========================================================= */
 
-function SettingsPage() {
+export function SettingsPage() {
 
   return (
     <div className="dash-page">
 
-      <h1 className="dash-title">
-        Paramètres
-      </h1>
+      <h1 className="dash-title">Paramètres</h1>
 
-      <p className="dash-subtitle">
-        Gérez les préférences de votre compte.
-      </p>
+      <p className="dash-subtitle">Gérez les préférences de votre compte.</p>
 
 
       <div className="dash-card dash-settings-card">
 
-        {/* EMAIL NOTIFICATIONS */}
-
         <div className="dash-settings-row">
-
           <div>
-
-            <p className="dash-settings-label">
-              Notifications par email
-            </p>
-
-            <p className="dash-settings-hint">
-              Recevoir un résumé quotidien de l'activité.
-            </p>
-
+            <p className="dash-settings-label">Notifications par email</p>
+            <p className="dash-settings-hint">Recevoir un résumé quotidien de l'activité.</p>
           </div>
 
-
           <label className="dash-switch">
-
-            <input
-              type="checkbox"
-              defaultChecked
-            />
-
+            <input type="checkbox" defaultChecked />
             <span className="dash-switch-track" />
-
           </label>
-
         </div>
 
 
-        {/* TWO FACTOR */}
-
         <div className="dash-settings-row">
-
           <div>
-
-            <p className="dash-settings-label">
-              Authentification à deux facteurs
-            </p>
-
-            <p className="dash-settings-hint">
-              Ajoute une couche de sécurité supplémentaire.
-            </p>
-
+            <p className="dash-settings-label">Authentification à deux facteurs</p>
+            <p className="dash-settings-hint">Ajoute une couche de sécurité supplémentaire.</p>
           </div>
 
-
           <label className="dash-switch">
-
             <input type="checkbox" />
-
             <span className="dash-switch-track" />
-
           </label>
-
         </div>
 
 
-        {/* LANGUAGE */}
-
         <div className="dash-settings-row">
-
           <div>
-
-            <p className="dash-settings-label">
-              Langue
-            </p>
-
-            <p className="dash-settings-hint">
-              Langue utilisée dans l'interface.
-            </p>
-
+            <p className="dash-settings-label">Langue</p>
+            <p className="dash-settings-hint">Langue utilisée dans l'interface.</p>
           </div>
-
 
           <button className="dash-select">
-
             Français
-
             <ChevronDown size={16} />
-
           </button>
-
         </div>
 
       </div>
@@ -1221,7 +687,7 @@ function SettingsPage() {
    HELP PAGE
    ========================================================= */
 
-function HelpPage() {
+export function HelpPage() {
 
   const faqs = [
     {
@@ -1242,73 +708,35 @@ function HelpPage() {
   return (
     <div className="dash-page">
 
-      <h1 className="dash-title">
-        Aide
-      </h1>
+      <h1 className="dash-title">Aide</h1>
 
-      <p className="dash-subtitle">
-        Questions fréquentes et support.
-      </p>
+      <p className="dash-subtitle">Questions fréquentes et support.</p>
 
-
-      {/* SEARCH */}
 
       <div className="dash-card dash-search-card">
-
         <Search size={18} />
-
-        <input
-          placeholder="Rechercher dans l'aide..."
-          className="dash-search-input"
-        />
-
+        <input placeholder="Rechercher dans l'aide..." className="dash-search-input" />
       </div>
 
-
-      {/* FAQ */}
 
       <div className="dash-card">
-
         {faqs.map((f) => (
-
-          <div
-            className="dash-faq-item"
-            key={f.q}
-          >
-
-            <p className="dash-faq-q">
-              {f.q}
-            </p>
-
-            <p className="dash-faq-a">
-              {f.a}
-            </p>
-
+          <div className="dash-faq-item" key={f.q}>
+            <p className="dash-faq-q">{f.q}</p>
+            <p className="dash-faq-a">{f.a}</p>
           </div>
-
         ))}
-
       </div>
 
 
-      {/* SUPPORT */}
-
       <div className="dash-card dash-contact-card">
-
         <LifeBuoy size={22} />
-
         <div>
-
-          <p className="dash-settings-label">
-            Besoin d'aide supplémentaire ?
-          </p>
-
+          <p className="dash-settings-label">Besoin d'aide supplémentaire ?</p>
           <p className="dash-settings-hint">
             Contactez le support à support@konnectifly.com
           </p>
-
         </div>
-
       </div>
 
     </div>

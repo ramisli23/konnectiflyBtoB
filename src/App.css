@@ -1,51 +1,126 @@
+/* =========================================================
+   App shell — palette simple (4 bleus + blanc), tailles fluides
+   ========================================================= */
 .App {
-  text-align: center;
-}
+  --app-blue: #0077b6;
+  --app-blue-dark: #023e73;
+  --app-blue-deep: #012a4d;
+  --app-blue-light: #eaf4fb;
+  --app-white: #ffffff;
+  --app-bg: color-mix(in srgb, var(--app-blue-light) 55%, var(--app-white));
 
-.App {
   display: flex;
   text-align: left;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
- 
+
 .main-content {
   flex: 1;
+  min-width: 0;            /* évite que le contenu fasse déborder le flex */
   height: 100vh;
+  height: 100dvh;          /* mobile : tient compte de la barre d'adresse */
   overflow-y: auto;
-  background-color: #f8fafc;
- 
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  background-color: var(--app-bg);
 }
- 
+
+/* ---------- Reliquats Create React App (supprimables si inutilisés) ---------- */
 .App-logo {
-  height: 40vmin;
+  height: clamp(120px, 40vmin, 320px);
   pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    animation: App-logo-spin 20s linear infinite;
   }
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: var(--app-blue-deep);
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  padding: clamp(12px, 0.4rem + 2vw, 48px);
+  font-size: clamp(1rem, 0.8rem + 1vmin, 1.5rem);
+  color: var(--app-white);
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--app-blue-light);
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* =========================================================
+   ROUTING — écran de chargement + page 404
+   ========================================================= */
+.route-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 2rem;
+
+  background: var(--kf-blue-light, #eaf4fb);
+  color: var(--kf-blue-deep, #012a4d);
+
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+  text-align: center;
+}
+
+.route-loader h1 {
+  margin: 0;
+  font-size: clamp(3rem, 2rem + 8vw, 6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--kf-blue, #0077b6);
+}
+
+.route-loader p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(1, 42, 77, 0.65);
+}
+
+.route-loader-btn {
+  margin-top: 0.5rem;
+  padding: 0.7rem 1.4rem;
+
+  background: var(--kf-blue, #0077b6);
+  color: #ffffff;
+
+  border: none;
+  border-radius: 999px;
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+
+.route-loader-btn:hover {
+  background: var(--kf-blue-dark, #023e73);
+}
+
+.route-loader-btn:focus-visible {
+  outline: 2px solid var(--kf-blue, #0077b6);
+  outline-offset: 3px;
 }

@@ -1,10 +1,29 @@
-import { useState, useEffect } from "react"
-import "./App.css"
+import { useState, useEffect } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+  useOutletContext,
+} from "react-router-dom";
 
-import Sidebar, { SidebarItem } from "./components/layout/Sidebar"
-import Dashboard from "./components/pages/Dashboard/Dashboard"
-import KonnectiFlyLanding from "./components/pages/landing/vitrine"
-import AuthPage from "./components/pages/landing/AuthPage"
+import "./App.css";
+
+import DashboardLayout from "./components/layout/DashboardLayout";
+import RequireAuth from "./components/layout/RequireAuth";
+
+import { DashboardHome, SettingsPage, HelpPage } from "./components/pages/Dashboard/Dashboard";
+
+import BuyPackages from "./components/pages/Packages/BuyPackage.js";
+import CountryRoute from "./components/pages/Packages/CountryRoute.js";
+import Dealers from "./components/pages/Dealers/Dealers.js";
+import Credits from "./components/pages/Credits/credits.js";
+import Guide from "./Guide/guide.js";
+import Policy from "./policy/CommunicationPolicy.js";
+
+import KonnectiFlyLanding from "./components/pages/landing/vitrine";
+import AuthPage from "./components/pages/landing/AuthPage";
 
 import {
   getAgencyProfile,
@@ -13,259 +32,217 @@ import {
   getCachedProfile,
   saveCachedProfile,
   clearCachedProfile,
-} from "./services/Api"
+} from "./services/Api";
 
-import {
-  LayoutDashboard,
-  BarChart3,
-  UserCircle,
-  Package,
-  Settings,
-  LifeBuoy, BookOpen,      // Guide
-  ShieldCheck, 
-} from "lucide-react"
+/* =====================================================
+   PAGE 404
+   ===================================================== */
 
+function NotFound() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="route-loader">
+      <h1>404</h1>
+
+      <p>Cette page n&apos;existe pas.</p>
+
+      <button
+        type="button"
+        className="route-loader-btn"
+        onClick={() => navigate("/", { replace: true })}
+      >
+        Retour à l&apos;accueil
+      </button>
+    </div>
+  );
+}
+
+/* =====================================================
+   PAGES PUBLIQUES
+   ===================================================== */
+
+function LandingRoute({ user, onLogin, onLogout }) {
+  return (
+    <KonnectiFlyLanding
+      user={user}
+      onLogin={onLogin}
+      onLogout={onLogout}
+    />
+  );
+}
+
+function LoginRoute({ onAuthenticated }) {
+  const navigate = useNavigate();
+
+  // Page d'origine mémorisée par RequireAuth (redirection après connexion)
+  const { from } = useLocation();
+
+  return (
+    <AuthPage
+      initialMode="login"
+      onBack={() => navigate("/")}
+      onAuthenticated={(loggedInUser) => {
+        onAuthenticated(loggedInUser);
+
+        const target =
+          from && typeof from.pathname === "string" && !from.pathname.includes("/login")
+            ? from.pathname
+            : "/dashboard";
+
+        navigate(target, { replace: true });
+      }}
+    />
+  );
+}
+
+/* =====================================================
+   APP — COQUILLE + ROUTES
+   ===================================================== */
 
 function App() {
-  // 'checking' | 'landing' | 'auth' | 'dashboard'
-  const [view, setView] = useState("checking")
+  // 'checking' | 'authenticated' | 'anonymous'
+  const [authStatus, setAuthStatus] = useState("checking");
 
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
 
-  const [activePage, setActivePage] = useState("Dashboard")
-
+  const navigate = useNavigate();
 
   /* =====================================================
      RESTORE SESSION
      ===================================================== */
 
   useEffect(() => {
-    const token = getAuthToken()
+    const token = getAuthToken();
 
     if (!token) {
-      setView("landing")
-      return
+      setAuthStatus("anonymous");
+      return;
     }
 
-    const cached = getCachedProfile()
+    const cached = getCachedProfile();
 
     if (cached) {
-      setUser({
-        ...cached,
-        token,
-      })
-
-      setView("dashboard")
+      setUser({ ...cached, token });
+      setAuthStatus("authenticated");
     }
 
     getAgencyProfile(token)
       .then((profile) => {
-        saveCachedProfile(profile)
+        saveCachedProfile(profile);
 
-        setUser({
-          ...profile,
-          token,
-        })
-
-        setView("dashboard")
+        setUser({ ...profile, token });
+        setAuthStatus("authenticated");
       })
       .catch(() => {
-        clearAuthToken()
-        clearCachedProfile()
+        clearAuthToken();
+        clearCachedProfile();
 
-        setUser(null)
-
-        setView("landing")
-      })
-  }, [])
-
+        setUser(null);
+        setAuthStatus("anonymous");
+      });
+  }, []);
 
   /* =====================================================
-     LOGOUT
+     LOGIN / LOGOUT
      ===================================================== */
+
+  const handleAuthenticated = (loggedInUser) => {
+    setUser(loggedInUser);
+    setAuthStatus("authenticated");
+  };
 
   const logout = () => {
-    clearAuthToken()
-    clearCachedProfile()
+    clearAuthToken();
+    clearCachedProfile();
 
-    setUser(null)
+    setUser(null);
+    setAuthStatus("anonymous");
 
-    setView("landing")
-  }
-
-
-  /* =====================================================
-     CHECKING
-     ===================================================== */
-
-  if (view === "checking") {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          fontFamily: "system-ui, sans-serif",
-          color: "#64748b",
-        }}
-      >
-        Chargement…
-      </div>
-    )
-  }
-
+    navigate("/", { replace: true });
+  };
 
   /* =====================================================
-     LANDING PAGE
-     ===================================================== */
-
-  if (view === "landing") {
-    return (
-      <KonnectiFlyLanding
-        user={user}
-        onLogin={() => setView("auth")}
-        onLogout={logout}
-      />
-    )
-  }
-
-
-  /* =====================================================
-     AUTH PAGE
-     ===================================================== */
-
-  if (view === "auth") {
-    return (
-      <AuthPage
-        onBack={() => setView("landing")}
-        onAuthenticated={(loggedInUser) => {
-          setUser(loggedInUser)
-          setView("dashboard")
-        }}
-      />
-    )
-  }
-
-
-  /* =====================================================
-     DASHBOARD
+     ROUTES
      ===================================================== */
 
   return (
-    <div className="App flex">
+    <Routes>
+      {/* ---------- PUBLIC ---------- */}
 
-      <Sidebar
-        user={user}
-        onLogout={logout}
-      >
+      <Route
+        path="/"
+        element={
+          <LandingRoute
+            user={user}
+            onLogin={() => navigate("/login")}
+            onLogout={logout}
+          />
+        }
+      />
 
-        {/* ================================================
-            DASHBOARD
-            ================================================ */}
+      <Route
+        path="/login"
+        element={<LoginRoute onAuthenticated={handleAuthenticated} />}
+      />
 
-        <SidebarItem
-          icon={<LayoutDashboard size={20} />}
-          text="Dashboard"
-          active={activePage === "Dashboard"}
-          onClick={() => setActivePage("Dashboard")}
-        />
+      {/* ---------- PRIVÉ ---------- */}
 
+      <Route element={<RequireAuth authStatus={authStatus} />}>
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardLayout user={user} onLogout={logout} />
+          }
+        >
+          <Route index element={<DashboardRoute />} />
+          <Route path="packages" element={<BuyPackages />} />
+          <Route path="packages/:scope/:id" element={<CountryRoute />} />
+          <Route path="dealers" element={<DealersRoute />} />
+          <Route path="credits" element={<CreditsRoute />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="guide" element={<GuideRoute />} />
+          <Route path="policy" element={<PolicyRoute />} />
+          <Route path="help" element={<HelpPage />} />
+        </Route>
+      </Route>
 
-        {/* ================================================
-            PACKAGES
-            ================================================ */}
+      {/* ---------- REDIRECTIONS & 404 ---------- */}
 
-        <SidebarItem
-          icon={<BarChart3 size={20} />}
-          text="Packages"
-          active={activePage === "Packages"}
-          onClick={() => setActivePage("Packages")}
-        />
+      <Route path="/dashboard/*" element={<Navigate to="/dashboard" replace />} />
 
-
-        {/* ================================================
-            DEALERS
-            ================================================ */}
-
-        <SidebarItem
-          icon={<UserCircle size={20} />}
-          text="Dealers"
-          alert
-          active={activePage === "Dealers"}
-          onClick={() => setActivePage("Dealers")}
-        />
-
-
-        {/* ================================================
-            CREDITS
-            ================================================ */}
-
-        <SidebarItem
-          icon={<Package size={20} />}
-          text="Credits"
-          active={activePage === "Credits"}
-          onClick={() => setActivePage("Credits")}
-        />
-
-
-        <hr className="my-3" />
-
-
-        {/* ================================================
-            SETTINGS
-            ================================================ */}
-
-        <SidebarItem
-          icon={<Settings size={20} />}
-          text="Settings"
-          active={activePage === "Settings"}
-          onClick={() => setActivePage("Settings")}
-        />
-
-  <SidebarItem
-          icon={<BookOpen size={20} />}
-          text="Guide"
-          active={activePage === "Guide"}
-          onClick={() => setActivePage("Guide")}
-        />
-        <SidebarItem
-          icon={<ShieldCheck size={20} />}
-          text="Policy"
-          active={activePage === "Policy"}
-          onClick={() => setActivePage("Policy")}
-        />
-        {/* ================================================
-            HELP
-            ================================================ */}
-
-        <SidebarItem
-          icon={<LifeBuoy size={20} />}
-          text="Help"
-          active={activePage === "Help"}
-          onClick={() => setActivePage("Help")}
-        />
-
-      </Sidebar>
-
-
-      {/* ===================================================
-          MAIN CONTENT
-          =================================================== */}
-
-      <main className="main-content">
-
-        <Dashboard
-          page={activePage}
-          user={user}
-          onLogout={logout}
-        />
-
-      </main>
-
-    </div>
-  )
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
 
+/* =====================================================
+   PAGES PRIVÉES — récupèrent `user` via Outlet context
+   ===================================================== */
 
-export default App
+function DashboardRoute() {
+  const { user } = useOutletContext();
+  return <DashboardHome user={user} />;
+}
+
+function DealersRoute() {
+  const navigate = useNavigate();
+  return <Dealers onBack={() => navigate("/dashboard")} />;
+}
+
+function CreditsRoute() {
+  const navigate = useNavigate();
+  return <Credits onBack={() => navigate("/dashboard")} />;
+}
+
+function GuideRoute() {
+  const navigate = useNavigate();
+  return <Guide onBack={() => navigate("/dashboard")} />;
+}
+
+function PolicyRoute() {
+  const navigate = useNavigate();
+  return <Policy onBack={() => navigate("/dashboard")} />;
+}
+
+export default App;

@@ -175,6 +175,7 @@
   border-radius: 0.5rem;
   cursor: pointer;
   color: var(--sidebar-muted);
+  text-decoration: none;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;

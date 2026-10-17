@@ -1,211 +1,235 @@
 /* =========================================================
-   Variables de Design (Palette Moderne)
+   TOKENS — 4 bleus uniquement + blanc / noir en opacité
+   (mêmes valeurs dans CountryPage.css, BuyPackage.css,
+   packageDetail.css et Dashboard.css)
    ========================================================= */
 :root {
-  --color-primary: #0077b6;
-  --color-primary-hover: #005f92;
-  --color-primary-light: #eff6ff;
-  --color-bg-subtle: #f8fafc;
+  --kf-blue: #0077b6;
+  --kf-blue-dark: #023e73;
+  --kf-blue-deep: #012a4d;
+  --kf-blue-light: #eaf4fb;
+
+  --color-primary: var(--kf-blue);
+  --color-primary-hover: var(--kf-blue-dark);
+  --color-primary-dark: var(--kf-blue-dark);
+  --color-primary-deep: var(--kf-blue-deep);
+  --color-primary-light: var(--kf-blue-light);
+  --color-primary-tint: rgba(0, 119, 182, 0.08);
+  --color-primary-tint-strong: rgba(0, 119, 182, 0.16);
   --color-card-bg: #ffffff;
+  --color-bg-subtle: var(--kf-blue-light);
+  --color-bg-subtle-strong: rgba(0, 119, 182, 0.14);
 
-  --color-text-primary: #0f172a;
-  --color-text-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-border-hover: #cbd5e1;
+  --color-white: #ffffff;
+  --color-black: var(--kf-blue-deep);
 
-  --color-black: #111111;
+  --color-text-primary: var(--kf-blue-deep);
+  --color-text-secondary: rgba(1, 42, 77, 0.7);
+  --color-text-muted: rgba(1, 42, 77, 0.52);
+  --color-text-placeholder: rgba(1, 42, 77, 0.35);
+  --color-inverse-text: #ffffff;
 
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --color-border: rgba(1, 42, 77, 0.1);
+  --color-border-light: rgba(1, 42, 77, 0.06);
+  --color-border-hover: rgba(0, 119, 182, 0.35);
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-pill: 999px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 10px 15px -3px rgba(0, 119, 182, 0.12), 0 4px 6px -4px rgba(0, 119, 182, 0.06);
+  --shadow-sm: 0 1px 2px rgba(1, 42, 77, 0.05);
+  --shadow-md: 0 2px 10px rgba(1, 42, 77, 0.06);
+  --shadow-hover: 0 10px 24px -14px rgba(0, 119, 182, 0.55);
+  --shadow-focus: 0 0 0 3px rgba(0, 119, 182, 0.14);
 
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 140ms ease;
+}
+
+/* =========================================================
+   TOKENS SCOPÉS À LA PAGE
+   guide.css et CommunicationPolicy.css redéfinissent des
+   variables `:root` : on les fige ici pour que ces pages
+   gardent toujours exactement la même palette.
+   ========================================================= */
+.packages-wrapper,
+.buy-package-page,
+.package-detail-page,
+.checkout-page,
+.dash-page {
+  --kf-blue: #0077b6;
+  --kf-blue-dark: #023e73;
+  --kf-blue-deep: #012a4d;
+  --kf-blue-light: #eaf4fb;
+
+  --color-primary: var(--kf-blue);
+  --color-primary-hover: var(--kf-blue-dark);
+  --color-primary-dark: var(--kf-blue-dark);
+  --color-primary-deep: var(--kf-blue-deep);
+  --color-primary-light: var(--kf-blue-light);
+  --color-primary-tint: rgba(0, 119, 182, 0.08);
+  --color-primary-tint-strong: rgba(0, 119, 182, 0.16);
+  --color-card-bg: #ffffff;
+  --color-bg-subtle: var(--kf-blue-light);
+  --color-bg-subtle-strong: rgba(0, 119, 182, 0.14);
+
+  --color-white: #ffffff;
+  --color-black: var(--kf-blue-deep);
+
+  --color-text-primary: var(--kf-blue-deep);
+  --color-text-secondary: rgba(1, 42, 77, 0.7);
+  --color-text-muted: rgba(1, 42, 77, 0.52);
+  --color-text-placeholder: rgba(1, 42, 77, 0.35);
+
+  --color-border: rgba(1, 42, 77, 0.1);
+  --color-border-light: rgba(1, 42, 77, 0.06);
+  --color-border-hover: rgba(0, 119, 182, 0.35);
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(1, 42, 77, 0.05);
+  --shadow-md: 0 2px 10px rgba(1, 42, 77, 0.06);
+  --shadow-hover: 0 10px 24px -14px rgba(0, 119, 182, 0.55);
+  --shadow-focus: 0 0 0 3px rgba(0, 119, 182, 0.14);
+
+  --transition-fast: 140ms ease;
 }
 
 /* =========================================================
    Page
    ========================================================= */
-.dash-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 0.75rem 1.25rem;
+.buy-package-page {
   font-family: var(--font-sans);
+  color: var(--color-text-secondary);
 }
 
-.dash-title {
-  margin: 14px 0 2px 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.dash-subtitle {
-  margin: 0 0 14px 0;
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
+.buy-package-page *,
+.buy-package-page *::before,
+.buy-package-page *::after {
+  box-sizing: border-box;
 }
 
 /* =========================================================
-   Header top bar (Dashboard)
+   Barre du haut
    ========================================================= */
-.package-detail-header-buy-package {
+.buy-package-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.6rem;
 
-  padding: 10px 16px;
-  margin: 0 -0.75rem;
+  padding: 0.65rem 1rem;
+  margin: 0;
 
-  background: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--color-card-bg);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.package-detail-back-btn-buy-package {
+.buy-package-back-btn {
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
 
   background: none;
   border: none;
 
-  color: #111;
+  color: var(--kf-blue-deep);
   cursor: pointer;
 
-  transition: color var(--transition-fast);
+  transition: background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
-.package-detail-back-btn-buy-package:hover {
-  color: var(--color-primary);
+.buy-package-back-btn:hover {
+  background: var(--kf-blue-light);
+  color: var(--kf-blue);
 }
 
-.package-detail-header-divider-buy-package {
+.buy-package-back-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.buy-package-header-divider {
   width: 1px;
-  height: 16px;
-
-  background: #ddd;
-}
-
-.package-detail-header-icon-buy-package,
-.package-detail-header-icon {
-  color: #333;
-}
-
-.package-detail-header-title-buy-package {
-  margin: 0;
-
-  font-size: 14px;
-  font-weight: 700;
-
-  color: #111;
-}
-
-/* =========================================================
-   Sélecteurs et Filtres (fallback si utilisés hors CountryPage)
-   ========================================================= */
-.filters-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.package-type-selector {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px;
-  background: var(--color-bg-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-
-.package-type-btn {
-  border: none;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text-muted);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.package-type-btn:hover {
-  color: var(--color-text-primary);
-}
-
-.package-type-btn-active {
-  background: var(--color-card-bg);
-  color: var(--color-primary);
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
-}
-
-/* =========================================================
-   Stats (optionnel, pour "stats" du dashboard si affichées)
-   ========================================================= */
-.dash-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: 24px;
-}
-
-.dash-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--color-card-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 1rem 1.25rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.dash-stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  height: 1.1rem;
   flex-shrink: 0;
+  background: var(--color-border);
 }
 
-.dash-stat-value {
-  font-size: 1.25rem;
+.buy-package-header-icon {
+  flex-shrink: 0;
+  color: var(--kf-blue);
+}
+
+.buy-package-header-title {
+  margin: 0;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--kf-blue-deep);
 }
 
-.dash-stat-label {
-  font-size: 0.8rem;
+/* =========================================================
+   Corps de la page
+   ========================================================= */
+.buy-package-body {
+  max-width: 75rem;
+  margin-inline: auto;
+  padding: 1.1rem 1rem 2.5rem;
+}
+
+.buy-package-title {
+  margin: 0 0 0.15rem;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--kf-blue-deep);
+}
+
+.buy-package-subtitle {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
   color: var(--color-text-muted);
 }
 
-.dash-stat-change {
-  font-size: 0.75rem;
-  font-weight: 600;
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 768px) {
+  .buy-package-body {
+    padding: 0.9rem 0.75rem 2rem;
+  }
+
+  .buy-package-title {
+    font-size: 1.1rem;
+  }
+
+  .buy-package-subtitle {
+    font-size: 0.8rem;
+  }
 }
 
-.dash-stat-change.positive {
-  color: #16a34a;
-}
+@media (max-width: 480px) {
+  .buy-package-header {
+    padding: 0.55rem 0.75rem;
+  }
 
-.dash-stat-change.negative {
-  color: #dc2626;
+  .buy-package-body {
+    padding: 0.8rem 0.6rem 1.75rem;
+  }
 }
