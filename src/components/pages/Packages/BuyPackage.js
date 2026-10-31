@@ -39,11 +39,20 @@ export default function BuyPackages() {
           Choisissez une destination pour voir les forfaits disponibles.
         </p>
 
-        {/* La sélection ouvre la route /dashboard/packages/:scope/:id */}
+        {/* La sélection ouvre la route /dashboard/packages/:scope/:id
+            en conservant les filtres (type / mode / billing) */}
         <Packages
-          onSelect={(country) =>
-            navigate(`/dashboard/packages/${country.scope}/${country.id}`)
-          }
+          onSelect={(country) => {
+            const params = new URLSearchParams({
+              type: country.type,
+              mode: country.mode,
+              billing: country.billing,
+            });
+
+            navigate(
+              `/dashboard/packages/${country.scope}/${country.id}?${params}`,
+            );
+          }}
         />
       </div>
     </div>

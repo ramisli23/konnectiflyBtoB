@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 
 import "./CountryPage.css";
 
@@ -15,6 +15,12 @@ import PackageDetail from "../../../components/packages/packageDetail.js";
 export default function CountryRoute() {
   const { scope = "countries", id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Filtres transmis par la liste des destinations
+  const type = searchParams.get("type") || undefined;
+  const mode = searchParams.get("mode") || undefined;
+  const billing = searchParams.get("billing") || undefined;
 
   const [state, setState] = useState({
     loading: true,
@@ -52,6 +58,9 @@ export default function CountryRoute() {
             country: {
               ...found,
               scope,
+              type,
+              mode,
+              billing,
             },
             error: null,
           });

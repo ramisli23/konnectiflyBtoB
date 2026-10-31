@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -14,6 +15,7 @@ import {
 import "./Checkout.css";
 
 import { getCachedProfile } from "../../services/Api";
+import { formatDataAllowance, formatValidity } from "../../utils/format";
 
 /* =====================================================
    VALIDATION
@@ -95,9 +97,6 @@ const buildInitialForm = (profile) => {
 const formatDZD = (value) =>
   Number(value || 0).toLocaleString("fr-FR");
 
-const formatUSD = (value) =>
-  Number(value || 0).toFixed(2);
-
 /** Référence de commande lisible : KF-<8 caractères> */
 const buildOrderRef = (plan) => {
   const seed = `${plan?.id ?? ""}${Date.now()}`
@@ -111,7 +110,7 @@ const buildOrderRef = (plan) => {
    COMPOSANT
    ===================================================== */
 
-export default function Checkout({ plan, countryName, onBack, onSubmit }) {
+export default function Checkout({ plan, countryName, onBack, onSubmit, onViewOrders }) {
   const [form, setForm] = useState(() =>
     buildInitialForm(getCachedProfile())
   );
@@ -124,7 +123,6 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
   const formRef = useRef(null);
 
   const priceDZD = formatDZD(plan.priceDZD);
-  const priceUSD = formatUSD(plan.priceUSD);
 
   const errorList = useMemo(
     () => FIELD_ORDER.filter((name) => errors[name]),
@@ -200,7 +198,7 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
     setSubmitting(true);
 
     try {
-      await onSubmit({
+      const created = await onSubmit({
         plan,
         customer: {
           firstName: form.firstName.trim(),
@@ -210,7 +208,7 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
         },
       });
 
-      setOrderRef(buildOrderRef(plan));
+      setOrderRef(created?.reference || buildOrderRef(plan));
     } catch (err) {
       setSubmitError(
         err?.message || "La commande n'a pas pu être envoyée. Réessayez."
@@ -256,16 +254,14 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
             <div className="checkout-success-row">
               <dt>Forfait</dt>
               <dd>
-                {plan.data_quantity} {plan.data_unit} ·{" "}
-                {plan.package_validity} {plan.package_validity_unit}
+                {formatDataAllowance(plan)} ·{" "}
+                {formatValidity(plan)}
               </dd>
             </div>
 
             <div className="checkout-success-row">
               <dt>Montant</dt>
-              <dd>
-                {priceDZD} DZD · ${priceUSD}
-              </dd>
+              <dd>{priceDZD} DZD</dd>
             </div>
           </dl>
 
@@ -278,13 +274,23 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
               Retour aux packages
             </button>
 
-            <button
-              type="button"
-              className="checkout-ghost-btn"
-              onClick={onBack}
-            >
-              Voir toutes les destinations
-            </button>
+            {onViewOrders ? (
+              <button
+                type="button"
+                className="checkout-ghost-btn"
+                onClick={onViewOrders}
+              >
+                Voir mes commandes
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="checkout-ghost-btn"
+                onClick={onBack}
+              >
+                Voir toutes les destinations
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -390,12 +396,12 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
             <div className="checkout-row">
               {field("firstName", "Prénom", {
                 autoComplete: "given-name",
-                placeholder: "Amina",
+                placeholder: "Prenom",
               })}
 
               {field("lastName", "Nom", {
                 autoComplete: "family-name",
-                placeholder: "Boudiaf",
+                placeholder: "Nom",
               })}
             </div>
 
@@ -403,7 +409,7 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
               type: "email",
               autoComplete: "email",
               inputMode: "email",
-              placeholder: "amina@exemple.com",
+              placeholder: "email@exemple.com",
             })}
 
             {field("phone", "Téléphone", {
@@ -435,6 +441,15 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
                 J'accepte les conditions générales de vente.
               </span>
             </label>
+
+            <Link
+              to="/legal#cgu"
+              className="checkout-terms-link"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Lire les conditions générales de vente
+            </Link>
 
             {errors.acceptTerms && (
               <span
@@ -488,8 +503,7 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
               )}
 
               <span className="checkout-summary-data">
-                {plan.data_quantity}{" "}
-                <span>{plan.data_unit}</span>
+                {formatDataAllowance(plan)}
               </span>
             </div>
 
@@ -497,10 +511,7 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
               <li>
                 <Calendar size={15} aria-hidden="true" />
                 <span>Validité</span>
-                <strong>
-                  {plan.package_validity}{" "}
-                  {plan.package_validity_unit}
-                </strong>
+                <strong>{formatValidity(plan)}</strong>
               </li>
 
               <li>
@@ -521,10 +532,6 @@ export default function Checkout({ plan, countryName, onBack, onSubmit }) {
                   DZD
                 </span>
               </strong>
-
-              <small className="checkout-summary-total-usd">
-                ${priceUSD}
-              </small>
             </div>
 
             <ul className="checkout-summary-perks">

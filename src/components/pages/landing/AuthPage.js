@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import {
   Plane,
   Mail,
@@ -170,7 +171,7 @@ export default function AuthPage({ onBack, onAuthenticated, initialMode = "login
               « Nos clients activent leur eSIM avant même de récupérer leurs
               bagages. »
             </p>
-            <span>— Rami, Berrahal Travel</span>
+            <span></span>
           </div>
         </aside>
 
@@ -241,7 +242,7 @@ export default function AuthPage({ onBack, onAuthenticated, initialMode = "login
                       <input
                         id="companyName"
                         type="text"
-                        placeholder="Berrahal Travel"
+                        placeholder="Votre entreprise"
                         value={form.companyName}
                         onChange={update("companyName")}
                         autoComplete="organization"
@@ -263,7 +264,7 @@ export default function AuthPage({ onBack, onAuthenticated, initialMode = "login
                       <input
                         id="contactName"
                         type="text"
-                        placeholder="Rami"
+                        placeholder="Votre nom complet"
                         value={form.contactName}
                         onChange={update("contactName")}
                         autoComplete="name"
@@ -371,9 +372,9 @@ export default function AuthPage({ onBack, onAuthenticated, initialMode = "login
                       />
                       Se souvenir de moi
                     </label>
-                    <a href="#" className="kf-auth-link">
+                    <Link to="/forgot-password" className="kf-auth-link">
                       Mot de passe oublié ?
-                    </a>
+                    </Link>
                   </div>
                 ) : (
                   <div className="kf-auth-field">
@@ -383,9 +384,24 @@ export default function AuthPage({ onBack, onAuthenticated, initialMode = "login
                         checked={form.acceptTerms}
                         onChange={update("acceptTerms")}
                       />
-                      J'accepte les conditions d'utilisation et la politique de
-                      confidentialité
+                      J&apos;accepte les conditions d&apos;utilisation et la
+                      politique de confidentialité
                     </label>
+
+                    <p className="kf-auth-consent-links">
+                      <Link to="/legal#cgu" target="_blank" rel="noreferrer">
+                        Lire les conditions
+                      </Link>
+                      <span aria-hidden="true">·</span>
+                      <Link
+                        to="/legal#confidentialite"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Politique de confidentialité
+                      </Link>
+                    </p>
+
                     {errors.acceptTerms && (
                       <span className="kf-auth-error">{errors.acceptTerms}</span>
                     )}

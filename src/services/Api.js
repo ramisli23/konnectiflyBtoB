@@ -114,6 +114,111 @@ export async function getAgencyProfile(token) {
   return data
 }
 
+// ---------------------------------------------------------------
+// COMMANDES
+// ---------------------------------------------------------------
+
+/** En-têtes optionnels : le backend accepte les commandes sans jeton,
+ *  mais on l'envoie quand l'agence est connectée. */
+function authHeaders() {
+  const token = getAuthToken()
+
+  return token ? { Authorization: `Bearer ${token}` } : undefined
+}
+
+/**
+ * Commandes d'une agence.
+ * GET /orders/agency/:agencyId[?status=active]
+ * → { total, data: [...] }
+ */
+export async function getAgencyOrders(agencyId, { status } = {}) {
+  if (!agencyId) {
+    throw new Error("Identifiant d'agence manquant")
+  }
+
+  const params = new URLSearchParams()
+
+  if (status && status !== "all") {
+    params.set("status", status)
+  }
+
+  const query = params.toString()
+
+  const response = await fetch(
+    `${API_URL}/orders/agency/${encodeURIComponent(agencyId)}${
+      query ? `?${query}` : ""
+    }`,
+    { headers: authHeaders() }
+  )
+
+  const data = await parseJsonSafe(response)
+
+  if (!response.ok) {
+    throw new Error(data.message || "Impossible de récupérer les commandes")
+  }
+
+  const orders = Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data)
+      ? data
+      : []
+
+  return {
+    total: Number(data?.total ?? orders.length),
+    data: orders,
+  }
+}
+
+/**
+ * Synthèse des commandes d'une agence.
+ * GET /orders/agency/:agencyId/summary
+ * → { commandes, esimActives, enCours, montantTotal, currency }
+ */
+export async function getAgencyOrdersSummary(agencyId) {
+  if (!agencyId) {
+    throw new Error("Identifiant d'agence manquant")
+  }
+
+  const response = await fetch(
+    `${API_URL}/orders/agency/${encodeURIComponent(agencyId)}/summary`,
+    { headers: authHeaders() }
+  )
+
+  const data = await parseJsonSafe(response)
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer la synthèse des commandes"
+    )
+  }
+
+  return data
+}
+
+/**
+ * Détail complet d'une commande (inclut les données eSIM : ICCID,
+ * SM-DP+, code d'activation, QR code, lien universel).
+ * GET /orders/agency/:agencyId/:orderId
+ */
+export async function getAgencyOrder(agencyId, orderId) {
+  if (!agencyId || !orderId) {
+    throw new Error("Identifiant de commande manquant")
+  }
+
+  const response = await fetch(
+    `${API_URL}/orders/agency/${encodeURIComponent(agencyId)}/${encodeURIComponent(orderId)}`,
+    { headers: authHeaders() }
+  )
+
+  const data = await parseJsonSafe(response)
+
+  if (!response.ok) {
+    throw new Error(data.message || "Impossible de récupérer le détail de la commande")
+  }
+
+  return data
+}
+
 const TOKEN_KEY = "konnectifly_token"
 const PROFILE_KEY = "konnectifly_profile"
 

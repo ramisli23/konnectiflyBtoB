@@ -5,8 +5,9 @@ import Sidebar, { SidebarItem } from "./Sidebar"
 import {
   LayoutDashboard,
   BarChart3,
-  UserCircle,
+  FileText,
   Package,
+  Receipt,
   Settings,
   LifeBuoy,
   BookOpen,
@@ -20,7 +21,8 @@ import {
 export const DASHBOARD_LINKS = [
   { to: "/dashboard", text: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/dashboard/packages", text: "Packages", icon: BarChart3 },
-  { to: "/dashboard/dealers", text: "Dealers", icon: UserCircle, alert: true },
+  { to: "/dashboard/orders", text: "Orders", icon: Receipt },
+  { to: "/dashboard/invoices", text: "Invoices", icon: FileText },
   { to: "/dashboard/credits", text: "Credits", icon: Package },
 ]
 

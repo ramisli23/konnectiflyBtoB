@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import "./guide.css"
 
 import {
@@ -638,9 +639,9 @@ export default function Guide({ onBack }) {
           <span>
             Need help? Contact support via <strong>WhatsApp</strong> or{" "}
             <strong>resellertechnical@esimcard.com</strong>. Check the{" "}
-            <a href="#" className="guide-link">
+            <Link to="/dashboard/policy" className="guide-link">
               Communication Policy
-            </a>{" "}
+            </Link>{" "}
             page for all support channels.
           </span>
         </footer>

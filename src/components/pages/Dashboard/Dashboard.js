@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react"
+import { Link } from "react-router-dom"
 
 import {
   Wallet,
@@ -19,7 +20,6 @@ import {
   ShoppingCart,
   MapPin,
   Globe,
-  ChevronDown,
   Search,
   LifeBuoy,
   Activity,
@@ -66,7 +66,7 @@ function useDashboardStats(user) {
       business: [
         {
           label: "All Bundles Amount",
-          value: `${Number(user?.balance ?? 0).toFixed(2)} DZD`,
+          value: `${Number(user?.balance ?? 0).toFixed(2)} DZ`,
           icon: <Coins size={22} />,
           dark: true,
           live: true,
@@ -80,13 +80,13 @@ function useDashboardStats(user) {
 
         {
           label: "Dealer Sale Amount",
-          value: "$0",
+          value: "0DZ",
           icon: <Handshake size={22} />,
         },
 
         {
           label: "Dealer Profit",
-          value: "0 DZD",
+          value: "0 DZ",
           icon: <TrendingUp size={22} />,
         },
       ],
@@ -128,34 +128,22 @@ function useDashboardStats(user) {
       allTime: [
         {
           label: "Total Wallet Refill",
-          value: "$100",
+          value: "30000DZ",
           icon: <CreditCard size={17} />,
         },
         {
           label: "Total Bundles Sold",
-          value: "$34",
+          value: "3456DZ",
           icon: <Package size={17} />,
         },
         {
           label: "Total eSIM Sold",
-          value: "$21",
+          value: "34563",
           icon: <FileText size={17} />,
         },
-        {
-          label: "Total Dealers",
-          value: "$1",
-          icon: <Users size={17} />,
-        },
-        {
-          label: "Dealer Sales",
-          value: "$0",
-          icon: <ShoppingCart size={17} />,
-        },
-        {
-          label: "Dealer Profit",
-          value: "$0",
-          icon: <LineChartIcon size={17} />,
-        },
+       
+       
+       
       ],
 
       monthly: [
@@ -626,57 +614,284 @@ export function DashboardHome({ user }) {
    SETTINGS PAGE
    ========================================================= */
 
-export function SettingsPage() {
+const PREFERENCES_KEY = "konnectifly_preferences"
+
+const DEFAULT_PREFERENCES = {
+  dailySummary: true,
+  productUpdates: false,
+  twoFactor: false,
+}
+
+function readPreferences() {
+  try {
+    const raw = localStorage.getItem(PREFERENCES_KEY)
+
+    const parsed = raw ? JSON.parse(raw) : null
+
+    return { ...DEFAULT_PREFERENCES, ...(parsed || {}) }
+  } catch {
+    return { ...DEFAULT_PREFERENCES }
+  }
+}
+
+async function copyToClipboard(text) {
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+  } catch {
+    // repli ci-dessous
+  }
+
+  try {
+    const area = document.createElement("textarea")
+
+    area.value = text
+    area.setAttribute("readonly", "")
+    area.style.position = "fixed"
+    area.style.opacity = "0"
+
+    document.body.appendChild(area)
+    area.select()
+
+    const ok = document.execCommand("copy")
+
+    area.remove()
+
+    return ok
+  } catch {
+    return false
+  }
+}
+
+export function SettingsPage({ user }) {
+  const [preferences, setPreferences] = useState(readPreferences)
+
+  const [copied, setCopied] = useState(false)
+
+  const toggle = (key) => {
+    const next = { ...preferences, [key]: !preferences[key] }
+
+    setPreferences(next)
+
+    try {
+      localStorage.setItem(PREFERENCES_KEY, JSON.stringify(next))
+    } catch {
+      // stockage indisponible : le choix reste actif pour la session
+    }
+  }
+
+  const apiKey = user?.api_key || ""
+
+  const maskedKey = apiKey
+    ? `${apiKey.slice(0, 4)}••••••••${apiKey.slice(-4)}`
+    : ""
+
+  const handleCopyKey = async () => {
+    const ok = await copyToClipboard(apiKey)
+
+    setCopied(ok)
+
+    if (ok) window.setTimeout(() => setCopied(false), 1600)
+  }
+
+  const profileRows = [
+    { label: "Société", value: user?.company_name || user?.name || "—" },
+    { label: "Contact", value: user?.contact_name || "—" },
+    { label: "Email", value: user?.email || "—" },
+    { label: "Téléphone", value: user?.phone || "—" },
+    {
+      label: "Commission",
+      value:
+        user?.commission_rate != null
+          ? `${Number(user.commission_rate)} %`
+          : "—",
+    },
+    {
+      label: "Solde",
+      value: `${Number(user?.balance ?? 0).toLocaleString("fr-FR")} DZ`,
+    },
+  ]
 
   return (
     <div className="dash-page">
 
       <h1 className="dash-title">Paramètres</h1>
 
-      <p className="dash-subtitle">Gérez les préférences de votre compte.</p>
+      <p className="dash-subtitle">
+        Gérez votre agence, vos préférences et vos accès.
+      </p>
 
+      {/* ---------- PROFIL AGENCE ---------- */}
 
-      <div className="dash-card dash-settings-card">
+      <section className="dash-card dash-settings-card">
+        <h2 className="dash-settings-title">Profil de l&apos;agence</h2>
+
+        <dl className="dash-profile-list">
+          {profileRows.map((row) => (
+            <div key={row.label}>
+              <dt>{row.label}</dt>
+              <dd>{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <p className="dash-settings-footer">
+          Ces informations sont fournies par votre compte. Pour les modifier,
+          écrivez à{" "}
+          <a
+            href="mailto:support@konnectifly.com"
+            className="dash-inline-link"
+          >
+            support@konnectifly.com
+          </a>
+          .
+        </p>
+      </section>
+
+      {/* ---------- PRÉFÉRENCES ---------- */}
+
+      <section className="dash-card dash-settings-card">
+        <h2 className="dash-settings-title">Préférences</h2>
 
         <div className="dash-settings-row">
           <div>
-            <p className="dash-settings-label">Notifications par email</p>
-            <p className="dash-settings-hint">Recevoir un résumé quotidien de l'activité.</p>
+            <p className="dash-settings-label">Résumé quotidien</p>
+            <p className="dash-settings-hint">
+              Recevoir un récapitulatif de l&apos;activité par email.
+            </p>
           </div>
 
           <label className="dash-switch">
-            <input type="checkbox" defaultChecked />
+            <input
+              type="checkbox"
+              checked={preferences.dailySummary}
+              onChange={() => toggle("dailySummary")}
+              aria-label="Résumé quotidien par email"
+            />
             <span className="dash-switch-track" />
           </label>
         </div>
 
-
         <div className="dash-settings-row">
           <div>
-            <p className="dash-settings-label">Authentification à deux facteurs</p>
-            <p className="dash-settings-hint">Ajoute une couche de sécurité supplémentaire.</p>
+            <p className="dash-settings-label">Nouveautés et offres</p>
+            <p className="dash-settings-hint">
+              Être informé des nouveaux forfaits et destinations.
+            </p>
           </div>
 
           <label className="dash-switch">
-            <input type="checkbox" />
+            <input
+              type="checkbox"
+              checked={preferences.productUpdates}
+              onChange={() => toggle("productUpdates")}
+              aria-label="Nouveautés et offres"
+            />
             <span className="dash-switch-track" />
           </label>
         </div>
 
+        <div className="dash-settings-row">
+          <div>
+            <p className="dash-settings-label">
+              Authentification à deux facteurs
+            </p>
+            <p className="dash-settings-hint">
+              Ajoute une couche de sécurité supplémentaire.
+            </p>
+          </div>
+
+          <label className="dash-switch">
+            <input
+              type="checkbox"
+              checked={preferences.twoFactor}
+              onChange={() => toggle("twoFactor")}
+              aria-label="Authentification à deux facteurs"
+            />
+            <span className="dash-switch-track" />
+          </label>
+        </div>
+
+        <p className="dash-settings-footer">
+          Les préférences sont enregistrées sur cet appareil.
+        </p>
+      </section>
+
+      {/* ---------- INTÉGRATION API ---------- */}
+
+      <section className="dash-card dash-settings-card">
+        <h2 className="dash-settings-title">Intégration API</h2>
+
+        {apiKey ? (
+          <div className="dash-api-box">
+            <div>
+              <p className="dash-settings-label">Clé API</p>
+              <code className="dash-api-key">{maskedKey}</code>
+            </div>
+
+            <button
+              type="button"
+              className="dash-api-copy"
+              onClick={handleCopyKey}
+            >
+              {copied ? "Copiée" : "Copier"}
+            </button>
+          </div>
+        ) : (
+          <p className="dash-settings-hint">
+            Vos clés API sont générées lors de la création du compte agence.
+            Contactez le support pour les consulter ou les régénérer.
+          </p>
+        )}
+
+        <p className="dash-settings-footer">
+          L&apos;API permet de créer des commandes eSIM et de suivre vos soldes
+          depuis vos propres outils.
+        </p>
+      </section>
+
+      {/* ---------- SÉCURITÉ ---------- */}
+
+      <section className="dash-card dash-settings-card">
+        <h2 className="dash-settings-title">Sécurité</h2>
 
         <div className="dash-settings-row">
           <div>
-            <p className="dash-settings-label">Langue</p>
-            <p className="dash-settings-hint">Langue utilisée dans l'interface.</p>
+            <p className="dash-settings-label">Mot de passe</p>
+            <p className="dash-settings-hint">
+              La réinitialisation est validée par notre équipe.
+            </p>
           </div>
 
-          <button className="dash-select">
-            Français
-            <ChevronDown size={16} />
-          </button>
+          <Link to="/forgot-password" className="dash-select">
+            Réinitialiser
+          </Link>
         </div>
 
-      </div>
+        <div className="dash-settings-row">
+          <div>
+            <p className="dash-settings-label">Devise</p>
+            <p className="dash-settings-hint">
+              Tous les montants de la plateforme sont en dinars algériens.
+            </p>
+          </div>
+
+          <span className="dash-settings-value">DZ</span>
+        </div>
+
+        <p className="dash-settings-footer">
+          Une activité suspecte ? Écrivez immédiatement à{" "}
+          <a
+            href="mailto:support@konnectifly.com"
+            className="dash-inline-link"
+          >
+            support@konnectifly.com
+          </a>
+          .
+        </p>
+      </section>
 
     </div>
   )
@@ -688,57 +903,104 @@ export function SettingsPage() {
    ========================================================= */
 
 export function HelpPage() {
+  const [query, setQuery] = useState("")
 
   const faqs = [
     {
-      q: "Comment ajouter un nouvel utilisateur ?",
-      a: 'Rendez-vous dans Utilisateurs puis cliquez sur "Ajouter un utilisateur".',
+      q: "Comment passer une commande ?",
+      a: "Ouvrez Packages, choisissez une destination et un forfait, puis cliquez sur Acheter. La confirmation s'affiche immédiatement et la commande rejoint votre historique.",
+      to: "/dashboard/packages",
+      cta: "Ouvrir les packages",
     },
     {
-      q: "Comment activer un forfait pour un client ?",
-      a: "Depuis Inventaire, sélectionnez le forfait et assignez-le au client concerné.",
+      q: "Où retrouver l'eSIM d'un client ?",
+      a: "Toutes vos eSIM achetées sont listées dans Commandes. Ouvrez une commande pour copier l'adresse SM-DP+, le code d'activation et l'ICCID.",
+      to: "/dashboard/orders",
+      cta: "Voir les commandes",
     },
     {
-      q: "Que faire en cas de stock faible ?",
-      a: "Une alerte automatique apparaît sur le tableau de bord ; contactez votre fournisseur pour réapprovisionner.",
+      q: "Comment recharger mon solde ?",
+      a: "Le bouton Recharger de la barre latérale ouvre la recharge de crédits. L'historique des mouvements et le solde sont disponibles dans Crédits.",
+      to: "/dashboard/credits",
+      cta: "Voir les crédits",
+    },
+    {
+      q: "Comment gérer mes revendeurs ?",
+      a: "La page Revendeurs permet d'ajouter une agence, de la modifier et de suivre son statut et son solde. Vous pouvez aussi exporter la liste en CSV.",
+      to: "/dashboard/dealers",
+      cta: "Gérer les revendeurs",
+    },
+    {
+      q: "Comment installer une eSIM ?",
+      a: "Le guide pas à pas couvre l'installation sur iOS et Android, la saisie manuelle des informations et les réglages APN.",
+      to: "/dashboard/guide",
+      cta: "Ouvrir le guide",
+    },
+    {
+      q: "Quels sont les canaux de support ?",
+      a: "La politique de communication détaille les canaux officiels et les délais de réponse. Le support reste joignable par email et WhatsApp.",
+      to: "/dashboard/policy",
+      cta: "Lire la politique",
     },
   ]
 
+  const needle = query.trim().toLowerCase()
+
+  const visibleFaqs = needle
+    ? faqs.filter((faq) =>
+        `${faq.q} ${faq.a}`.toLowerCase().includes(needle)
+      )
+    : faqs
 
   return (
     <div className="dash-page">
-
       <h1 className="dash-title">Aide</h1>
 
       <p className="dash-subtitle">Questions fréquentes et support.</p>
 
-
       <div className="dash-card dash-search-card">
         <Search size={18} />
-        <input placeholder="Rechercher dans l'aide..." className="dash-search-input" />
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Rechercher dans l'aide..."
+          className="dash-search-input"
+          aria-label="Rechercher dans l'aide"
+        />
       </div>
-
 
       <div className="dash-card">
-        {faqs.map((f) => (
-          <div className="dash-faq-item" key={f.q}>
-            <p className="dash-faq-q">{f.q}</p>
-            <p className="dash-faq-a">{f.a}</p>
+        {visibleFaqs.map((faq) => (
+          <div className="dash-faq-item" key={faq.q}>
+            <p className="dash-faq-q">{faq.q}</p>
+            <p className="dash-faq-a">{faq.a}</p>
+
+            <Link to={faq.to} className="dash-faq-link">
+              {faq.cta}
+              <ArrowUpRight size={13} />
+            </Link>
           </div>
         ))}
-      </div>
 
+        {!visibleFaqs.length && (
+          <p className="dash-help-empty">
+            Aucune réponse ne correspond à « {query.trim()} ».
+          </p>
+        )}
+      </div>
 
       <div className="dash-card dash-contact-card">
         <LifeBuoy size={22} />
         <div>
           <p className="dash-settings-label">Besoin d'aide supplémentaire ?</p>
           <p className="dash-settings-hint">
-            Contactez le support à support@konnectifly.com
+            Contactez le support à{" "}
+            <a href="mailto:support@konnectifly.com" className="dash-inline-link">
+              support@konnectifly.com
+            </a>
           </p>
         </div>
       </div>
-
     </div>
   )
 }

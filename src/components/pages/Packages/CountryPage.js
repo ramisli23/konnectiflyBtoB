@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Globe,
@@ -14,7 +14,7 @@ import { Lottie } from "lottie-react";
 import "./CountryPage.css";
 import loadingAnimation from "../../../assets/lottie/Success.json";
 
-import { getCountriesoucontinents } from "../../../services/Api";
+import { getCountriesoucontinents, getPackagesByCountry } from "../../../services/Api";
 
 // =====================================================
 // SCOPE → LABEL UTILISÉ SUR LES CARTES
@@ -25,6 +25,25 @@ const SCOPE_LABELS = {
   continents: "Regional eSIM",
   global: "Global eSIM",
 };
+
+// =====================================================
+// FILTRES → VALEURS ATTENDUES PAR L'API
+// =====================================================
+
+const ENDPOINT_TYPE = {
+  countries: "country",
+  continents: "continent",
+  global: "global",
+};
+
+const API_PACKAGE_TYPE = {
+  dataOnly: "DATA-ONLY",
+  dataVoiceSms: "DATA-VOICE-SMS",
+};
+
+// Nombre de requêtes de prix simultanées (la liste contient
+// plus de 200 destinations : on limite la charge serveur)
+const PRICE_CONCURRENCY = 6;
 
 // =====================================================
 // COMPOSANT
@@ -44,6 +63,11 @@ export default function Packages({ onSelect }) {
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Prix minimum par destination : { [countryId]: number | null }
+  // undefined = pas encore chargé, null = aucun forfait
+  const [prices, setPrices] = useState({});
+  const priceCache = useRef(new Map());
 
   // ======================================
   // FILTER OPTIONS
@@ -126,6 +150,114 @@ export default function Packages({ onSelect }) {
       setLoading(false);
     }
   }
+
+  // ======================================
+  // PRIX MINIMUM PAR DESTINATION
+  // ======================================
+
+  useEffect(() => {
+    if (loading || countries.length === 0) {
+      return;
+    }
+
+    const endpointType = ENDPOINT_TYPE[packageScope] || "country";
+    const apiType = API_PACKAGE_TYPE[packageType] || "DATA-ONLY";
+    const apiMode = packageMode;
+
+    const cacheKey = (id) => `${endpointType}|${id}|${apiType}|${apiMode}`;
+
+    // Prix déjà connus : affichés tout de suite
+    const known = {};
+
+    for (const country of countries) {
+      const cached = priceCache.current.get(cacheKey(country.id));
+
+      if (cached !== undefined) {
+        known[country.id] = cached;
+      }
+    }
+
+    setPrices(known);
+
+    const pending = countries.filter(
+      (country) => !(country.id in known),
+    );
+
+    let cancelled = false;
+    let cursor = 0;
+
+    // Regroupe les mises à jour pour éviter un rendu par destination
+    let buffer = {};
+    let flushTimer = null;
+
+    const flush = () => {
+      flushTimer = null;
+
+      if (cancelled || Object.keys(buffer).length === 0) {
+        return;
+      }
+
+      const batch = buffer;
+      buffer = {};
+
+      setPrices((previous) => ({ ...previous, ...batch }));
+    };
+
+    const queue = (id, price) => {
+      buffer[id] = price;
+
+      if (flushTimer === null) {
+        flushTimer = setTimeout(flush, 80);
+      }
+    };
+
+    async function loadPrice(country) {
+      try {
+        const response = await getPackagesByCountry(
+          endpointType,
+          country.id,
+          apiType,
+          apiMode,
+        );
+
+        const list = Array.isArray(response?.data)
+          ? response.data
+          : [];
+
+        const values = list
+          .map((item) => Number(item?.priceDZD))
+          .filter((value) => Number.isFinite(value) && value > 0);
+
+        const min = values.length > 0 ? Math.min(...values) : null;
+
+        priceCache.current.set(cacheKey(country.id), min);
+        queue(country.id, min);
+      } catch {
+        // On n'affiche pas de prix pour cette destination
+        queue(country.id, null);
+      }
+    }
+
+    async function worker() {
+      while (!cancelled && cursor < pending.length) {
+        const country = pending[cursor];
+        cursor += 1;
+        await loadPrice(country);
+      }
+    }
+
+    Promise.all(
+      Array.from({ length: PRICE_CONCURRENCY }, worker),
+    );
+
+    return () => {
+      cancelled = true;
+
+      if (flushTimer !== null) {
+        clearTimeout(flushTimer);
+      }
+    };
+  }, [loading, countries, packageScope, packageType, packageMode]);
 
   // ======================================
   // SEARCH
@@ -452,7 +584,21 @@ export default function Packages({ onSelect }) {
               <div className="package-card-price">
                 <span className="price-label">Starting at</span>
 
-                <strong>240 DZ</strong>
+                {prices[country.id] ? (
+                  <strong>
+                    {prices[country.id].toLocaleString("fr-FR")} DZD
+                  </strong>
+                ) : (
+                  <strong
+                    className={
+                      prices[country.id] === null
+                        ? "price-unavailable"
+                        : "price-pending"
+                    }
+                  >
+                    {prices[country.id] === null ? "—" : "…"}
+                  </strong>
+                )}
               </div>
 
               <span className="package-card-cta">

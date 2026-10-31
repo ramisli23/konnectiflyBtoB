@@ -1,0 +1,338 @@
+{
+  "419558c5-512d-4b7f-aae1-a86cd00b2f0e": {
+    "4201001": {
+      "id": "4201001",
+      "invoiceId": "4201001",
+      "reference": "KF-7A2C41D9",
+      "destination": "Cameroun",
+      "destinationCode": "CM",
+      "package": {
+        "packageId": "pkg-cm-3gb-7d",
+        "dataQuantity": 3,
+        "dataUnit": "GB",
+        "unlimited": false,
+        "validityDays": 7,
+        "label": "3 GB · 7 jours"
+      },
+      "price": 7385,
+      "currency": "DZD",
+      "createdAt": "2026-10-27T09:41:00.000Z",
+      "status": "completed",
+      "displayStatus": "active",
+      "paid": true,
+      "customer": {
+        "firstname": "Karim",
+        "lastname": "Test",
+        "email": "client@example.com",
+        "phone": "0550000000",
+        "address": "Alger",
+        "imei": "356789123456789"
+      },
+      "updatedAt": "2026-10-27T09:41:06.773Z",
+      "esimData": {
+        "package": {
+          "activated": true,
+          "date_created": "2026-10-27 09:41:04",
+          "id": "pkg-369012",
+          "initial_data_quantity": 3,
+          "initial_data_unit": "GB",
+          "package": "3GB Data For 7Days in Cameroon, Unthrottled",
+          "package_type_id": "pkg-type-cm-3gb",
+          "rem_data_quantity": 2.4,
+          "rem_data_unit": "GB",
+          "sim": {
+            "apn": "globaldata",
+            "created_at": "2026-09-21T20:55:44.000000Z",
+            "iccid": "8910300000037369012",
+            "id": "01996e0f-9012-7363-8fa1-efb68de462d5",
+            "last_bundle": "3GB Data For 7Days in Cameroon, Unthrottled",
+            "matching_id": "TN20261027094105A1B2C3",
+            "qr_code_text": "LPA:1$consumer.e-sim.global$TN20261027094105A1B2C3",
+            "sim_applied": true,
+            "smdp_address": "consumer.e-sim.global",
+            "status": "Released",
+            "topup": 1,
+            "total_bundles": 0,
+            "universal_link": "https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=LPA:1$consumer.e-sim.global$TN20261027094105A1B2C3"
+          },
+          "sim_id": "8910300000037369012",
+          "status": "Released",
+          "unlimited": false
+        },
+        "sim": {
+          "apn": "globaldata",
+          "created_at": "2026-09-21T20:55:44.000000Z",
+          "iccid": "8910300000037369012",
+          "id": "01996e0f-9012-7363-8fa1-efb68de462d5",
+          "last_bundle": "3GB Data For 7Days in Cameroon, Unthrottled",
+          "matching_id": "TN20261027094105A1B2C3",
+          "qr_code_text": "LPA:1$consumer.e-sim.global$TN20261027094105A1B2C3",
+          "sim_applied": true,
+          "smdp_address": "consumer.e-sim.global",
+          "status": "Released",
+          "topup": 1,
+          "total_bundles": 0,
+          "universal_link": "https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=LPA:1$consumer.e-sim.global$TN20261027094105A1B2C3"
+        },
+        "sim_applied": true
+      }
+    },
+    "4201002": {
+      "id": "4201002",
+      "invoiceId": "4201002",
+      "reference": "KF-B1E85F6C",
+      "destination": "Viêt Nam",
+      "destinationCode": "VN",
+      "package": {
+        "packageId": "pkg-vn-20gb-30d",
+        "dataQuantity": 20,
+        "dataUnit": "GB",
+        "unlimited": false,
+        "validityDays": 30,
+        "label": "20 GB · 30 jours"
+      },
+      "price": 12300,
+      "currency": "DZD",
+      "createdAt": "2026-10-18T21:14:00.000Z",
+      "status": "completed",
+      "displayStatus": "active",
+      "paid": true,
+      "customer": {
+        "firstname": "Sara",
+        "lastname": "Test",
+        "email": "client@example.com",
+        "phone": "0550000000",
+        "address": "Alger",
+        "imei": "356789123456789"
+      },
+      "updatedAt": "2026-10-18T21:14:07.100Z",
+      "esimData": {
+        "package": {
+          "activated": true,
+          "date_created": "2026-10-18 21:14:05",
+          "id": "pkg-369013",
+          "initial_data_quantity": 20,
+          "initial_data_unit": "GB",
+          "package": "20GB Data For 30Days in Vietnam, Unthrottled",
+          "package_type_id": "pkg-type-vn-20gb",
+          "rem_data_quantity": 15.8,
+          "rem_data_unit": "GB",
+          "sim": {
+            "apn": "globaldata",
+            "created_at": "2026-09-21T20:55:44.000000Z",
+            "iccid": "8910300000037369013",
+            "id": "01996e0f-9013-7363-8fa1-efb68de462d5",
+            "last_bundle": "20GB Data For 30Days in Vietnam, Unthrottled",
+            "matching_id": "TN20261018211405D4E5F6",
+            "qr_code_text": "LPA:1$consumer.e-sim.global$TN20261018211405D4E5F6",
+            "sim_applied": true,
+            "smdp_address": "consumer.e-sim.global",
+            "status": "Released",
+            "topup": 1,
+            "total_bundles": 0,
+            "universal_link": "https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=LPA:1$consumer.e-sim.global$TN20261018211405D4E5F6"
+          },
+          "sim_id": "8910300000037369013",
+          "status": "Released",
+          "unlimited": false
+        },
+        "sim": {
+          "apn": "globaldata",
+          "created_at": "2026-09-21T20:55:44.000000Z",
+          "iccid": "8910300000037369013",
+          "id": "01996e0f-9013-7363-8fa1-efb68de462d5",
+          "last_bundle": "20GB Data For 30Days in Vietnam, Unthrottled",
+          "matching_id": "TN20261018211405D4E5F6",
+          "qr_code_text": "LPA:1$consumer.e-sim.global$TN20261018211405D4E5F6",
+          "sim_applied": true,
+          "smdp_address": "consumer.e-sim.global",
+          "status": "Released",
+          "topup": 1,
+          "total_bundles": 0,
+          "universal_link": "https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=LPA:1$consumer.e-sim.global$TN20261018211405D4E5F6"
+        },
+        "sim_applied": true
+      }
+    },
+    "4201003": {
+      "id": "4201003",
+      "invoiceId": "4201003",
+      "reference": "KF-49D3E2B7",
+      "destination": "Cameroun",
+      "destinationCode": "CM",
+      "package": {
+        "packageId": "pkg-cm-unl-3d",
+        "dataQuantity": null,
+        "dataUnit": "GB",
+        "unlimited": true,
+        "validityDays": 3,
+        "label": "Unlimited · 3 jours"
+      },
+      "price": 9945,
+      "currency": "DZD",
+      "createdAt": "2026-10-12T13:48:00.000Z",
+      "status": "payment_pending",
+      "displayStatus": "in_progress",
+      "paid": false,
+      "customer": {
+        "firstname": "Yacine",
+        "lastname": "Test",
+        "email": "client@example.com",
+        "phone": "0550000000",
+        "address": "Alger",
+        "imei": "356789123456789"
+      },
+      "updatedAt": "2026-10-12T13:48:05.535Z"
+    },
+    "4201004": {
+      "id": "4201004",
+      "invoiceId": "4201004",
+      "reference": "KF-2F67A9C1",
+      "destination": "Tunisie",
+      "destinationCode": "TN",
+      "package": {
+        "packageId": "pkg-tn-5gb-30d",
+        "dataQuantity": 5,
+        "dataUnit": "GB",
+        "unlimited": false,
+        "validityDays": 30,
+        "label": "5 GB · 30 jours"
+      },
+      "price": 6290,
+      "currency": "DZD",
+      "createdAt": "2026-07-29T23:27:00.000Z",
+      "status": "completed",
+      "displayStatus": "expired",
+      "paid": true,
+      "customer": {
+        "firstname": "Lina",
+        "lastname": "Test",
+        "email": "client@example.com",
+        "phone": "0550000000",
+        "address": "Alger",
+        "imei": "356789123456789"
+      },
+      "updatedAt": "2026-07-29T23:27:06.000Z",
+      "expiredAt": "2026-08-28T23:27:00.000Z",
+      "esimData": {
+        "package": {
+          "activated": true,
+          "date_created": "2026-07-29 23:27:05",
+          "id": "pkg-369014",
+          "initial_data_quantity": 5,
+          "initial_data_unit": "GB",
+          "package": "5GB Data For 30Days in Tunisia, Unthrottled",
+          "package_type_id": "pkg-type-tn-5gb",
+          "rem_data_quantity": 0,
+          "rem_data_unit": "GB",
+          "sim": {
+            "apn": "globaldata",
+            "created_at": "2026-09-21T20:55:44.000000Z",
+            "iccid": "8910300000037369014",
+            "id": "01996e0f-9014-7363-8fa1-efb68de462d5",
+            "last_bundle": "5GB Data For 30Days in Tunisia, Unthrottled",
+            "matching_id": "TN20260729232705G7H8I9",
+            "qr_code_text": "LPA:1$consumer.e-sim.global$TN20260729232705G7H8I9",
+            "sim_applied": true,
+            "smdp_address": "consumer.e-sim.global",
+            "status": "Released",
+            "topup": 1,
+            "total_bundles": 0,
+            "universal_link": "https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=LPA:1$consumer.e-sim.global$TN20260729232705G7H8I9"
+          },
+          "sim_id": "8910300000037369014",
+          "status": "Released",
+          "unlimited": false
+        },
+        "sim": {
+          "apn": "globaldata",
+          "created_at": "2026-09-21T20:55:44.000000Z",
+          "iccid": "8910300000037369014",
+          "id": "01996e0f-9014-7363-8fa1-efb68de462d5",
+          "last_bundle": "5GB Data For 30Days in Tunisia, Unthrottled",
+          "matching_id": "TN20260729232705G7H8I9",
+          "qr_code_text": "LPA:1$consumer.e-sim.global$TN20260729232705G7H8I9",
+          "sim_applied": true,
+          "smdp_address": "consumer.e-sim.global",
+          "status": "Released",
+          "topup": 1,
+          "total_bundles": 0,
+          "universal_link": "https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=LPA:1$consumer.e-sim.global$TN20260729232705G7H8I9"
+        },
+        "sim_applied": true
+      }
+    }
+  },
+  "419558c5-512d-4b7f-aae1-a86cd00b2f0e1": {
+    "4201010": {
+      "id": "4201010",
+      "invoiceId": "4201010",
+      "reference": "KF-3C9D1A20",
+      "destination": "France",
+      "destinationCode": "FR",
+      "package": {
+        "packageId": "pkg-fr-1gb-1d",
+        "dataQuantity": 1,
+        "dataUnit": "GB",
+        "unlimited": false,
+        "validityDays": 1,
+        "label": "1 GB · 1 jours"
+      },
+      "price": 555,
+      "currency": "DZD",
+      "createdAt": "2026-10-20T10:12:00.000Z",
+      "status": "waiting_payment",
+      "displayStatus": "pending",
+      "paid": false,
+      "customer": {
+        "firstname": "Rami",
+        "lastname": "Slimani",
+        "email": "rami@example.com",
+        "phone": "0770000000",
+        "address": "Alger",
+        "imei": "356789123456789"
+      },
+      "paymentUrl": "https://cib.satim.dz/payment/epg/merchants/merchantsatim/payment.html?mdOrder=EXAMPLE_MDORDER&language=fr",
+      "packageType": "DATA-ONLY",
+      "iccid": ""
+    }
+  },
+  "773b64e0-dddf-432c-9fe7-d2ec4d205d62": {
+    "4201011": {
+      "id": "4201011",
+      "invoiceId": "4201011",
+      "reference": "KF-8E4B7710",
+      "destination": "Turquie",
+      "destinationCode": "TR",
+      "package": {
+        "packageId": "pkg-tr-10gb-15d",
+        "dataQuantity": 10,
+        "dataUnit": "GB",
+        "unlimited": false,
+        "validityDays": 15,
+        "label": "10 GB · 15 jours"
+      },
+      "price": 4800,
+      "currency": "DZD",
+      "createdAt": "2026-10-05T16:30:00.000Z",
+      "status": "failed",
+      "displayStatus": "failed",
+      "paid": false,
+      "customer": {
+        "firstname": "Client",
+        "lastname": "Test",
+        "email": "client@example.com",
+        "phone": "0550000000",
+        "address": "Alger",
+        "imei": "356789123456789"
+      },
+      "errorMessage": {
+        "errors": [
+          "The selected package type id is invalid."
+        ],
+        "message": "The given data was invalid",
+        "status": false
+      }
+    }
+  }
+}

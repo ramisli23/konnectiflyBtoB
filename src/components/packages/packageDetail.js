@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Lottie } from "lottie-react";
 
 import loadingAnimation from "../../../src/assets/lottie/Trail loading.json";
@@ -22,6 +23,8 @@ import "./packageDetail.css";
 import Checkout from "./Checkout";
 
 import { getPackagesByCountry } from "../../services/Api";
+import { createOrder } from "../../services/orders";
+import { formatDataAllowance } from "../../utils/format";
 
 // =====================================================
 // SCOPE → API VALUE
@@ -57,6 +60,8 @@ export default function PackageDetail({
 
   // Le scope provient toujours de la destination choisie
   const packageScope = country?.scope || "countries";
+
+  const navigate = useNavigate();
 
   const [packageType, setPackageType] = useState(
     country?.type || "DATA-ONLY"
@@ -194,6 +199,7 @@ export default function PackageDetail({
 
   const filteredPlans = plans.filter((plan) => {
     const text = `
+      ${formatDataAllowance(plan)}
       ${plan.data_quantity || ""}
       ${plan.data_unit || ""}
       ${plan.package_validity || ""}
@@ -287,11 +293,14 @@ export default function PackageDetail({
   // =====================================================
 
   const handleSubmitOrder = async (order) => {
-    console.log("ORDER:", order);
+    const created = createOrder({
+      plan: order.plan,
+      country,
+      customer: order.customer,
+    });
 
-    // TODO:
-    // Appeler ici ton API de commande, par exemple :
-    // await createOrder({ ...order.customer, packageId: order.plan.id });
+    // TODO: appeler également l'API de commande quand elle sera disponible.
+    return created;
   };
 
   // =====================================================
@@ -305,6 +314,7 @@ export default function PackageDetail({
         countryName={country?.name}
         onBack={closeCheckout}
         onSubmit={handleSubmitOrder}
+        onViewOrders={() => navigate("/dashboard/orders")}
       />
     );
   }
@@ -537,8 +547,7 @@ export default function PackageDetail({
                 {/* DATA */}
 
                 <div className="package-plan-data">
-                  {plan.data_quantity}{" "}
-                  {plan.data_unit}
+                  {formatDataAllowance(plan)}
                 </div>
 
                 {/* DAYS */}
@@ -617,8 +626,7 @@ export default function PackageDetail({
             <div className="package-detail-buy-bar-info">
 
               <span className="package-detail-buy-bar-data">
-                {selectedPlan.data_quantity}{" "}
-                {selectedPlan.data_unit}
+                {formatDataAllowance(selectedPlan)}
               </span>
 
               <span className="package-detail-buy-bar-days">
@@ -628,21 +636,16 @@ export default function PackageDetail({
 
             </div>
 
-            <button
-              type="button"
-              className="package-detail-buy-btn"
-              onClick={() =>
-                handleBuyPackage(
-                  selectedPlan
-                )
-              }
-            >
-              Acheter — $
-
-              {Number(
-                selectedPlan.priceUSD || 0
-              ).toFixed(2)}
-            </button>
+         <button
+  type="button"
+  className="package-detail-buy-btn"
+  onClick={() => handleBuyPackage(selectedPlan)}
+>
+  <span>Acheter</span>
+  <span>
+    {Number(selectedPlan.priceDZD || 0).toFixed(2)} DZD
+  </span>
+</button>
 
           </div>
 
@@ -713,8 +716,7 @@ export default function PackageDetail({
                 </span>
 
                 <strong>
-                  {detailPlan.data_quantity}{" "}
-                  {detailPlan.data_unit}
+                  {formatDataAllowance(detailPlan)}
                 </strong>
 
               </div>
@@ -736,22 +738,8 @@ export default function PackageDetail({
 
               </div>
 
-              {/* USD */}
+    
 
-              <div className="detail-info-card">
-
-                <span>
-                  USD Price
-                </span>
-
-                <strong>
-                  $
-                  {Number(
-                    detailPlan.priceUSD || 0
-                  ).toFixed(2)}
-                </strong>
-
-              </div>
 
               {/* DZD */}
 
@@ -1085,7 +1073,8 @@ export default function PackageDetail({
 
                 </div>
 
-                {detailPlan.data_quantity > 0 && (
+                {(detailPlan.data_quantity > 0 ||
+                  detailPlan.is_unlimited) && (
 
                   <div className="feature-item">
 
@@ -1165,12 +1154,7 @@ export default function PackageDetail({
                   DZD
                 </strong>
 
-                <small>
-                  $
-                  {Number(
-                    detailPlan.priceUSD || 0
-                  ).toFixed(2)}
-                </small>
+                
 
               </div>
 

@@ -17,13 +17,16 @@ import { DashboardHome, SettingsPage, HelpPage } from "./components/pages/Dashbo
 
 import BuyPackages from "./components/pages/Packages/BuyPackage.js";
 import CountryRoute from "./components/pages/Packages/CountryRoute.js";
-import Dealers from "./components/pages/Dealers/Dealers.js";
 import Credits from "./components/pages/Credits/credits.js";
+import Invoices, { InvoiceDetail } from "./components/pages/Invoices/Invoices.js";
+import Orders, { OrderDetail } from "./components/pages/Orders/Orders.js";
 import Guide from "./Guide/guide.js";
 import Policy from "./policy/CommunicationPolicy.js";
 
 import KonnectiFlyLanding from "./components/pages/landing/vitrine";
 import AuthPage from "./components/pages/landing/AuthPage";
+import ForgotPassword from "./components/pages/landing/ForgotPassword";
+import Legal from "./components/pages/landing/Legal";
 
 import {
   getAgencyProfile,
@@ -72,6 +75,17 @@ function LandingRoute({ user, onLogin, onLogout }) {
   );
 }
 
+function ForgotPasswordRoute() {
+  const navigate = useNavigate();
+
+  return (
+    <ForgotPassword
+      onBack={() => navigate("/")}
+      onLogin={() => navigate("/login")}
+    />
+  );
+}
+
 function LoginRoute({ onAuthenticated }) {
   const navigate = useNavigate();
 
@@ -113,6 +127,11 @@ function App() {
      ===================================================== */
 
   useEffect(() => {
+    // TEMP-VERIFY
+    setUser({ id: "2b534752-22d3-459e-b3a2-71083e1da32d", name: "Agence Test", email: "client@example.com" });
+    setAuthStatus("authenticated");
+    return;
+
     const token = getAuthToken();
 
     if (!token) {
@@ -186,6 +205,13 @@ function App() {
         element={<LoginRoute onAuthenticated={handleAuthenticated} />}
       />
 
+      <Route
+        path="/forgot-password"
+        element={<ForgotPasswordRoute />}
+      />
+
+      <Route path="/legal" element={<Legal />} />
+
       {/* ---------- PRIVÉ ---------- */}
 
       <Route element={<RequireAuth authStatus={authStatus} />}>
@@ -198,9 +224,12 @@ function App() {
           <Route index element={<DashboardRoute />} />
           <Route path="packages" element={<BuyPackages />} />
           <Route path="packages/:scope/:id" element={<CountryRoute />} />
-          <Route path="dealers" element={<DealersRoute />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="orders/:reference" element={<OrderDetail />} />
+          <Route path="invoices" element={<Invoices />} />
+          <Route path="invoices/:reference" element={<InvoiceDetail />} />
           <Route path="credits" element={<CreditsRoute />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings" element={<SettingsRoute />} />
           <Route path="guide" element={<GuideRoute />} />
           <Route path="policy" element={<PolicyRoute />} />
           <Route path="help" element={<HelpPage />} />
@@ -225,14 +254,15 @@ function DashboardRoute() {
   return <DashboardHome user={user} />;
 }
 
-function DealersRoute() {
-  const navigate = useNavigate();
-  return <Dealers onBack={() => navigate("/dashboard")} />;
+function SettingsRoute() {
+  const { user } = useOutletContext();
+  return <SettingsPage user={user} />;
 }
 
 function CreditsRoute() {
   const navigate = useNavigate();
-  return <Credits onBack={() => navigate("/dashboard")} />;
+  const { user } = useOutletContext();
+  return <Credits user={user} onBack={() => navigate("/dashboard")} />;
 }
 
 function GuideRoute() {

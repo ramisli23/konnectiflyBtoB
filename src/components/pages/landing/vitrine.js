@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Link } from "react-router-dom"
 import {
   Plane,
   Search,
@@ -36,6 +37,11 @@ import {
 
 import "./vitrine.css"
 
+import {
+  getCountriesoucontinents,
+  getPackagesByCountry,
+} from "../../../services/Api"
+
 import europe from "../../../assets/images/europe.jpeg"
 import turquie from "../../../assets/images/turquie.jpeg"
 import egypte from "../../../assets/images/egypte.jpeg"
@@ -51,6 +57,146 @@ import mexique from "../../../assets/images/mexique.jpeg"
 import northafrica from "../../../assets/images/northafrica.jpeg"
 import asie from "../../../assets/images/asie.jpeg"
 import global from "../../../assets/images/global.jpeg"
+
+const LOCAL_CODES = ["us", "ca", "jp", "tr", "es", "ae", "gb", "mx"]
+const REGIONAL_CODES = ["eu", "af", "as", "na"]
+const PHONE_CODES = ["eu", "tr", "eg"]
+
+const DISPLAY_NAMES = {
+  us: "États-Unis",
+  ca: "Canada",
+  jp: "Japon",
+  tr: "Turquie",
+  es: "Espagne",
+  ae: "Émirats arabes unis",
+  gb: "Royaume-Uni",
+  mx: "Mexique",
+  eg: "Égypte",
+  eu: "Europe",
+  af: "Afrique",
+  as: "Asie",
+  na: "Amérique du Nord",
+}
+
+const LOCAL_PHOTOS = {
+  us: usa,
+  ca: canada,
+  jp: japon,
+  tr: turquie,
+  es: espagne,
+  ae: emirats,
+  gb: uk,
+  mx: mexique,
+  eg: egypte,
+  eu: europe,
+  af: northafrica,
+  as: asie,
+  na: usa,
+}
+const pick = (obj, keys) =>
+  keys.map((k) => obj?.[k]).find((v) => v !== undefined && v !== null && v !== "")
+
+function normalizePlan(pkg) {
+  const price = Number(pkg?.priceUSD)
+  if (!Number.isFinite(price) || price <= 0) return null
+
+  return {
+    id: pkg.id ?? pkg.packageId,
+    price: price.toFixed(2),
+    data: pick(pkg, ["dataAmount", "data", "volume", "dataGB", "size"]),
+    days: pick(pkg, ["validityDays", "validity", "duration", "days"]),
+  }
+}
+
+function formatData(v) {
+  if (v == null) return ""
+  if (typeof v === "number") return `${v} Go`
+  return String(v).replace(/gb/i, "Go").replace(/mb/i, "Mo")
+}
+
+function formatDays(v) {
+  if (v == null) return ""
+  const n = parseInt(v, 10)
+  return Number.isFinite(n) ? `${n} j` : String(v)
+}
+
+async function loadPlans(scope, id) {
+  const response = await getPackagesByCountry(scope, id, "DATA-ONLY", "limited")
+  const packages = Array.isArray(response?.data) ? response.data : []
+
+  return packages
+    .map(normalizePlan)
+    .filter(Boolean)
+    .sort((a, b) => a.price - b.price)
+}
+
+async function withMinPrices(destinations) {
+  return Promise.all(
+    destinations.map(async (destination) => {
+      try {
+        const plans = await loadPlans(destination.scope, destination.id)
+        if (!plans.length) return destination
+
+        return { ...destination, price: plans[0].price, plans: plans.slice(0, 3) }
+      } catch {
+        return destination
+      }
+    }),
+  )
+}
+function flagEmoji(code) {
+  const iso = String(code || "").toLowerCase()
+
+  if (iso.length !== 2) return "🌍"
+
+  if (iso === "eu") return "🇪🇺"
+  if (["as", "af", "na", "sa", "oc", "me"].includes(iso)) return "🌍"
+
+  return String.fromCodePoint(
+    ...[...iso.toUpperCase()].map((c) => 127397 + c.charCodeAt(0)),
+  )
+}
+
+function validDestinations(list) {
+  return Array.isArray(list)
+    ? list.filter((item) => item && item.id && item.name && item.code)
+    : []
+}
+
+function pickByCode(list, codes) {
+  const byCode = new Map(
+    list.map((item) => [String(item.code).toLowerCase(), item]),
+  )
+
+  return codes.map((code) => byCode.get(code)).filter(Boolean)
+}
+
+function mapDestination(item, fallbackPrice, extra = {}) {
+  const code = String(item.code).toLowerCase()
+
+  return {
+    id: item.id,
+    code,
+    name: DISPLAY_NAMES[code] || item.name,
+    flag: flagEmoji(code),
+    flagUrl: item.flag || null,
+    image: LOCAL_PHOTOS[code] || item.image_url || item.banner || item.flag,
+    price: fallbackPrice,
+    ...extra,
+  }
+}
+
+async function minPriceUSD(scope, id) {
+  const response = await getPackagesByCountry(scope, id, "DATA-ONLY", "limited")
+  const packages = Array.isArray(response?.data) ? response.data : []
+  const values = packages
+    .map((pkg) => Number(pkg?.priceUSD))
+    .filter((value) => Number.isFinite(value) && value > 0)
+
+  return values.length > 0 ? Math.min(...values).toFixed(2) : null
+}
+
+
 
 
 /* =========================================================
@@ -144,6 +290,7 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showMobileNav, setShowMobileNav] = useState(false)
   const [heroQuery, setHeroQuery] = useState("")
+  const [liveDestinations, setLiveDestinations] = useState(null)
 
   /* Active nav link (scroll spy) */
   const [activeSection, setActiveSection] = useState("destinations")
@@ -216,38 +363,112 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
   ]
 
   const localDestinations = [
-    { name: "États-Unis", flag: "🇺🇸", price: "1.92", image: usa },
-    { name: "Canada", flag: "🇨🇦", price: "4.50", image: canada },
-    { name: "Japon", flag: "🇯🇵", price: "1.54", image: japon },
-    { name: "Turquie", flag: "🇹🇷", price: "2.10", image: turquie },
-    { name: "Espagne", flag: "🇪🇸", price: "1.39", image: espagne },
-    { name: "Émirats arabes unis", flag: "🇦🇪", price: "3.75", image: emirats },
-    { name: "Royaume-Uni", flag: "🇬🇧", price: "1.62", image: uk },
-    { name: "Mexique", flag: "🇲🇽", price: "2.61", image: mexique },
+    { name: "États-Unis", flag: "🇺🇸", price: "600", image: usa },
+    { name: "Canada", flag: "🇨🇦", price: "1500", image: canada },
+    { name: "Japon", flag: "🇯🇵", price: "440", image: japon },
+    { name: "Turquie", flag: "🇹🇷", price: "400", image: turquie },
+    { name: "Espagne", flag: "🇪🇸", price: "400", image: espagne },
+    { name: "Émirats arabes unis", flag: "🇦🇪", price: "1250", image: emirats },
+    { name: "Royaume-Uni", flag: "🇬🇧", price: "400", image: uk },
+    { name: "Mexique", flag: "🇲🇽", price: "1155", image: mexique },
   ]
 
   const regionalDestinations = [
-    { name: "Europe", flag: "🌍", image: europe, price: "8.50" },
-    { name: "Afrique du Nord", flag: "🌍", image: northafrica, price: "6.90" },
-    { name: "Asie du Sud-Est", flag: "🌏", image: asie, price: "9.20" },
-    { name: "Amérique du Nord", flag: "🌎", image: usa, price: "7.40" },
+    { name: "Europe", flag: "🌍", image: europe, price: "750" },
+    { name: "Afrique du Nord", flag: "🌍", image: northafrica, price: "2955" },
+    { name: "Asie du Sud-Est", flag: "🌏", image: asie, price: "1040" },
+    { name: "Amérique du Nord", flag: "🌎", image: usa, price: "2000" },
   ]
 
   const globalDestinations = [
-    { name: "Global 130+ pays", flag: "🌐", image: global, price: "19.90" },
+    { name: "Global 130+ pays", flag: "🌐", image: global, price: "1235" },
   ]
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadFromApi() {
+      try {
+        const [countriesRaw, continentsRaw] = await Promise.all([
+          getCountriesoucontinents("countries"),
+          getCountriesoucontinents("continents"),
+        ])
+
+        const countries = validDestinations(countriesRaw)
+        const continents = validDestinations(continentsRaw)
+
+        const local = pickByCode(countries, LOCAL_CODES).map((item) =>
+          mapDestination(item, "—", { scope: "countries" }),
+        )
+        const regional = pickByCode(continents, REGIONAL_CODES).map((item) =>
+          mapDestination(item, "—", { scope: "continents" }),
+        )
+        const phone = pickByCode(
+          [...continents, ...countries],
+          PHONE_CODES,
+        ).map((item) =>
+          mapDestination(item, "—", {
+            scope: item.code === "eu" ? "continents" : "countries",
+          }),
+        )
+
+        const globalCard = {
+          id: 1,
+          code: "global",
+          name: "Global 130+ pays",
+          flag: "🌐",
+          flagUrl: null,
+          image: global,
+          price: "—",
+          scope: "global",
+        }
+
+        const [localPriced, regionalPriced, phonePriced, globalPriced] =
+          await Promise.all([
+            withMinPrices(local),
+            withMinPrices(regional),
+            withMinPrices(phone),
+            withMinPrices([globalCard]),
+          ])
+
+        if (cancelled) return
+
+        setLiveDestinations({
+          local: localPriced.length ? localPriced : null,
+          regional: regionalPriced.length ? regionalPriced : null,
+          global: globalPriced,
+          phone: phonePriced.length ? phonePriced : null,
+          search: countries.map((item) =>
+            mapDestination(item, null, { scope: "countries" }),
+          ),
+        })
+      } catch {
+        if (!cancelled) setLiveDestinations(null)
+      }
+    }
+
+    loadFromApi()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const destinationsByScope = {
-    local: localDestinations,
-    regional: regionalDestinations,
-    global: globalDestinations,
+    local: liveDestinations?.local || localDestinations,
+    regional: liveDestinations?.regional || regionalDestinations,
+    global: liveDestinations?.global || globalDestinations,
   }
 
-  const phoneDestinations = [
-    { name: "Europe", flag: "🇪🇺", image: europe, price: "8.50" },
-    { name: "Turquie", flag: "🇹🇷", image: turquie, price: "2.10" },
-    { name: "Égypte", flag: "🇪🇬", image: egypte, price: "3.40" },
-  ]
+  const phoneDestinations =
+    liveDestinations?.phone || [
+      { name: "Europe", flag: "🇪🇺", image: europe, price: "8.50" },
+      { name: "Turquie", flag: "🇹🇷", image: turquie, price: "2.10" },
+      { name: "Égypte", flag: "🇪🇬", image: egypte, price: "3.40" },
+    ]
+
+  const searchableDestinations =
+    liveDestinations?.search || destinationsByScope.local
 
   const steps = [
     {
@@ -304,10 +525,20 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
   const firstName = user?.name ? user.name.split(" ")[0] : "John"
 
   const filteredDestinations = heroQuery.trim()
-    ? destinationsByScope.local.filter((d) =>
+    ? searchableDestinations.filter((d) =>
         d.name.toLowerCase().includes(heroQuery.trim().toLowerCase())
-      )
+      ).slice(0, 8)
     : null
+
+  function destinationHref(destination) {
+    if (!destination?.id || !destination?.scope) {
+      return user ? "/dashboard/packages" : "/login"
+    }
+
+    return user
+      ? `/dashboard/packages/${destination.scope}/${destination.id}?type=DATA-ONLY&mode=limited&billing=fixed`
+      : "/login"
+  }
 
 
   return (
@@ -337,10 +568,7 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
           </nav>
 
           <div className="kf-navbar-actions">
-            <button className="kf-icon-btn" aria-label="Panier">
-              <ShoppingCart size={18} />
-              <span className="kf-cart-badge">0</span>
-            </button>
+           
 
             {user ? (
               <div className="kf-user-menu">
@@ -393,10 +621,7 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
               <Search size={18} />
             </button>
 
-            <button className="kf-icon-btn kf-toggle-btn" aria-label="Mode sombre">
-              <Moon size={18} />
-              <span className="kf-toggle-knob" />
-            </button>
+          
 
             <button
               className="kf-icon-btn kf-burger"
@@ -483,11 +708,19 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
                 <p className="kf-search-empty">Aucune destination trouvée pour « {heroQuery} »</p>
               ) : (
                 filteredDestinations.map((d) => (
-                  <a key={d.name} href="#destinations" onClick={() => setHeroQuery("")}>
-                    <span className="kf-search-flag">{d.flag}</span>
+                  <Link
+                    key={d.id || d.name}
+                    to={destinationHref(d)}
+                    onClick={() => setHeroQuery("")}
+                  >
+                    <span className="kf-search-flag">
+                      {d.flagUrl ? <img src={d.flagUrl} alt="" /> : d.flag}
+                    </span>
                     <strong>{d.name}</strong>
-                    <span className="kf-search-price">dès ${d.price}</span>
-                  </a>
+                    {d.price && d.price !== "—" ? (
+                      <span className="kf-search-price">dès ${d.price}</span>
+                    ) : null}
+                  </Link>
                 ))
               )}
             </div>
@@ -583,15 +816,19 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
                   {phoneDestinations.map((d, i) => (
                     <div
                       className="kf-phone-dest-card"
-                      key={i}
+                      key={d.id || i}
                       style={{
                         backgroundImage: `url(${d.image})`,
                         "--i": i,
                       }}
                     >
-                      <span className="kf-phone-dest-flag">{d.flag}</span>
+                      <span className="kf-phone-dest-flag">
+                        {d.flagUrl ? <img src={d.flagUrl} alt="" /> : d.flag}
+                      </span>
                       <span className="kf-phone-dest-name">{d.name}</span>
-                      <span className="kf-phone-dest-price">dès ${d.price}</span>
+                      <span className="kf-phone-dest-price">
+                        {d.price && d.price !== "—" ? `dès $${d.price}` : "eSIM"}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -691,39 +928,50 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
             ]}
           />
 
-          <button className="kf-cta-btn">
+          <Link className="kf-cta-btn" to={user ? "/dashboard/packages" : "/login"}>
             Voir toutes les destinations
             <ArrowUpRight size={16} className="kf-cta-arrow" />
-          </button>
+          </Link>
         </div>
 
-        <div className="kf-destinations-grid">
-          {destinationsByScope[destinationScope].map((d) => (
-            <div
-              className="kf-destination-card"
-              key={`${destinationScope}-${d.name}`}
-              tabIndex={0}
-            >
-              <span className="kf-destination-shine" aria-hidden="true" />
+   <div className="kf-destinations-grid">
+  {destinationsByScope[destinationScope].map((d) => (
+    <div
+      className="kf-destination-card"
+      key={`${destinationScope}-${d.id || d.name}`}
+    >
+      <span className="kf-destination-shine" aria-hidden="true" />
 
-              <div className="kf-destination-info">
-                <span className="kf-destination-flag-badge">{d.flag}</span>
-                <strong>{d.name}</strong>
-                <span className="kf-destination-price">À partir de ${d.price}</span>
-              </div>
+      <div className="kf-destination-info">
+        <span className="kf-destination-flag-badge">
+          {d.flagUrl ? <img src={d.flagUrl} alt="" /> : d.flag}
+        </span>
+        <strong>{d.name}</strong>
 
-              <div
-                className="kf-destination-photo"
-                style={{ backgroundImage: `url(${d.image})` }}
-                aria-hidden="true"
-              />
+        <span className="kf-destination-price">
+          {d.price && d.price !== "—" ? `À partir de ${d.price}DZ` : "Forfaits bientôt disponibles"}
+        </span>
 
-              <span className="kf-destination-arrow">
-                <ArrowUpRight size={16} />
-              </span>
-            </div>
-          ))}
-        </div>
+        {d.plans?.length > 0 && (
+          <ul className="kf-destination-plans">
+            {d.plans.map((p, i) => (
+              <li key={p.id ?? i}>
+                {[formatData(p.data), formatDays(p.days)].filter(Boolean).join(" · ")}
+                <b>${p.price}</b>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div
+        className="kf-destination-photo"
+        style={{ backgroundImage: `url(${d.image})` }}
+        aria-hidden="true"
+      />
+    </div>
+  ))}
+</div>
       </section>
 
 
@@ -844,7 +1092,14 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
         </div>
 
         <div className="kf-footer-cta-actions">
-          <button className="kf-cta-btn kf-cta-btn-light">
+          <button
+            className="kf-cta-btn kf-cta-btn-light"
+            onClick={() =>
+              document
+                .getElementById("destinations")
+                ?.scrollIntoView({ block: "start" })
+            }
+          >
             Explorer tous les forfaits
             <ArrowUpRight size={16} className="kf-cta-arrow" />
           </button>
@@ -875,6 +1130,12 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
             ))}
           </nav>
 
+          <nav className="kf-footer-legal" aria-label="Informations légales">
+            <Link to="/legal#mentions">Mentions légales</Link>
+            <Link to="/legal#cgu">CGU</Link>
+            <Link to="/legal#confidentialite">Confidentialité</Link>
+          </nav>
+
           <span className="kf-footer-copy">
             © {new Date().getFullYear()} KonnectiFly. Tous droits réservés.
           </span>
@@ -891,5 +1152,20 @@ export default function KonnectiFlyLanding({ onLogin, user, onLogout }) {
         <ArrowUp size={18} />
       </button>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   )
 }

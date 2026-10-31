@@ -83,7 +83,9 @@
 .packages-wrapper,
 .buy-package-page,
 .package-detail-page,
-.checkout-page {
+.checkout-page,
+.credits-page,
+.dealers-page {
   --kf-blue: #0077b6;
   --kf-blue-dark: #023e73;
   --kf-blue-deep: #012a4d;
@@ -2006,4 +2008,207 @@ body {
   .bundle-mini-bar i {
     animation: none !important;
   }
+}
+
+/* =========================================================
+   AIDE — liens des réponses
+   ========================================================= */
+
+.dash-faq-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  margin-top: 8px;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  color: var(--kf-blue);
+}
+
+.dash-faq-link:hover {
+  color: var(--kf-blue-dark);
+  text-decoration: underline;
+}
+
+.dash-help-empty {
+  margin: 0;
+  padding: 1.5rem 0.5rem;
+
+  font-size: 0.86rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.dash-inline-link {
+  color: var(--kf-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dash-inline-link:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   PARAMÈTRES — profil, préférences, API, sécurité
+   ========================================================= */
+
+.dash-settings-card {
+  gap: 0.85rem;
+}
+
+.dash-settings-title {
+  margin: 0;
+
+  font-size: 0.98rem;
+  font-weight: 700;
+
+  color: var(--kf-blue-deep);
+}
+
+.dash-settings-card .dash-settings-row {
+  padding: 0.8rem 0;
+
+  transition: none;
+}
+
+.dash-settings-card .dash-settings-row:hover {
+  padding-left: 0;
+
+  background: none;
+}
+
+.dash-settings-card .dash-select {
+  text-decoration: none;
+
+  transition: border-color 0.14s ease, background-color 0.14s ease;
+}
+
+.dash-settings-card .dash-select:hover,
+.dash-settings-card .dash-select:focus-visible {
+  transform: none;
+}
+
+.dash-settings-value {
+  flex-shrink: 0;
+
+  padding: 5px 12px;
+
+  background: var(--kf-blue-light);
+  color: var(--kf-blue-dark);
+
+  border-radius: 999px;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dash-settings-footer {
+  margin: 0;
+
+  font-size: 0.78rem;
+  line-height: 1.6;
+
+  color: var(--color-text-muted);
+}
+
+/* ---------- Profil ---------- */
+
+.dash-profile-list {
+  display: flex;
+  flex-direction: column;
+
+  margin: 0;
+}
+
+.dash-profile-list > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 8px 0;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.dash-profile-list > div:last-child {
+  border-bottom: none;
+}
+
+.dash-profile-list dt {
+  flex-shrink: 0;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  color: var(--color-text-muted);
+}
+
+.dash-profile-list dd {
+  margin: 0;
+
+  text-align: right;
+
+  font-size: 0.86rem;
+  font-weight: 600;
+
+  color: var(--kf-blue-deep);
+
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Clé API ---------- */
+
+.dash-api-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 10px 12px;
+
+  background: var(--kf-blue-light);
+  border-radius: 10px;
+}
+
+.dash-api-key {
+  display: inline-block;
+
+  margin-top: 2px;
+
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.82rem;
+
+  color: var(--kf-blue-deep);
+
+  overflow-wrap: anywhere;
+}
+
+.dash-api-copy {
+  flex-shrink: 0;
+
+  height: 30px;
+  padding: 0 12px;
+
+  background: var(--kf-blue);
+  color: #ffffff;
+
+  border: none;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background-color 0.14s ease;
+}
+
+.dash-api-copy:hover {
+  background: var(--kf-blue-dark);
 }
